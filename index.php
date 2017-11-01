@@ -15,17 +15,17 @@
 if((isset($_GET['pid']))&&($_GET['pid']==01))
 {
 	require("include/dbinfo.php");
-	$link=mysql_connect($server,$user,$pass)or die(errorReport(mysql_error()));
-	mysql_select_db($db,$link)or die(errorReport(mysql_error()));
+	$link=mysqli_connect($server,$user,$pass, $db)or die(errorReport(mysqli_error()));
+	mysqli_select_db($link, $db)or die(errorReport(mysqli_error()));
 	$username=$_POST['login'];
-	$result=mysql_query("select * from Passwords where Username='$username'");
-	if($row=mysql_fetch_array($result))
+	$result=mysqli_query($link,"select * from Passwords where Username='$username'");
+	if($row=mysqli_fetch_array($result))
 	{
 		if((!strcmp($row['Username'],$_POST['login']))&&(!strcmp($row['Password'],$_POST['password'])))
 		{
 			$username=$_POST['login'];
-			$result=mysql_query("select * from session where username='$username'");
-			$row=mysql_fetch_array($result);
+			$result=mysqli_query($link,"select * from session where username='$username'");
+			$row=mysqli_fetch_array($result);
 			if(strcmp($row['Username'],""))
 			{
 				echo "<script type=\"text/javascript\">alert(\"Multiple logins not allowed. Access Denied.\")</script>";
@@ -35,9 +35,10 @@ if((isset($_GET['pid']))&&($_GET['pid']==01))
 				session_start();
 				$sessionid=$_COOKIE['PHPSESSID'];
 				$_SESSION['username']=$username;
-				mysql_query("insert into session value ('$username','$sessionid')");
+				mysqli_query($link,"insert into session value ('$username','$sessionid')");
 				setcookie("username",$_POST['login'],time()+3600);
 				header('Location: login.php');
+				die();
 			}
 		}
 		else echo "<script type=\"text/javascript\">alert(\"Wrong Password. Access Denied.\")</script>";

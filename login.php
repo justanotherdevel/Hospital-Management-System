@@ -1,8 +1,8 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <?php
 require("include/dbinfo.php");
-$link=mysql_connect($server,$user,$pass)or die(errorReport(mysql_error()));
-mysql_select_db($db,$link)or die(errorReport(mysql_error()));
+$link=mysqli_connect($server,$user,$pass, $db)or die(errorReport(mysqli_error()));
+mysqli_select_db($link, $db)or die(errorReport(mysqli_error()));
 
 ?>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head><title>Hospital Management System</title><meta http-equiv="Content-Type" content="text/html;charset=utf-8"/>
@@ -229,18 +229,18 @@ mysql_select_db($db,$link)or die(errorReport(mysql_error()));
 <script type="text/javascript">if (window.name=="qm_launch_visual"){document.write('<scr'+'ipt type="text/javascript" src="http://www.opencube.com/qmv4/qm_visual.js"></scr'+'ipt>')}</script>
 <?php
 require("include/dbinfo.php");
-$link=mysql_connect($server,$user,$pass)or die(errorReport(mysql_error()));
-mysql_select_db($db,$link)or die(errorReport(mysql_error()));
+$link=mysqli_connect($server,$user,$pass, $db)or die(errorReport(mysqli_error()));
+mysqli_select_db($link, $db)or die(errorReport(mysqli_error()));
 if(!isset($_GET['pid']))
 {
 	echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
 	$username=$_COOKIE['username'];
 	$sessionid=$_COOKIE['PHPSESSID'];
-	$row=mysql_query("select * from session where username='$username' and id='$sessionid'");
-	if(!empty($row)&&(mysql_num_rows($row)))
+	$row=mysqli_query($link,"select * from session where username='$username' and id='$sessionid'");
+	if(!empty($row)&&(mysqli_num_rows($row)))
 	{
-		$result=mysql_query("select * from employee where Employee_ID='$username'");
-		if($row=mysql_fetch_array($result))
+		$result=mysqli_query($link,"select * from employee where Employee_ID='$username'");
+		if($row=mysqli_fetch_array($result))
 		{
 			$name=$row['Name'];
 			$eid=$row['Employee_ID'];
@@ -265,23 +265,23 @@ if(!isset($_GET['pid']))
 }
 else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_doctors")==0)))
 {
-	$result=mysql_query("select * from employee where category=\"Doctor\" ");
-	$count=mysql_num_rows($result);
+	$result=mysqli_query($link,"select * from employee where category=\"Doctor\" ");
+	$count=mysqli_num_rows($result);
 	echo "<div style=\"width:990px; float:left\">";
 	echo "<h2 align=\"left\">Doctors</h2>";
-	$result=mysql_query("select * from employee where category=\"Doctor\" ");
+	$result=mysqli_query($link,"select * from employee where category=\"Doctor\" ");
 	while($count)
 	{
-		$row=mysql_fetch_array($result);
+		$row=mysqli_fetch_array($result);
 		$name=$row['Name'];
 		$id=$row['Employee_ID'];
 		$contact=$row['Contact'];
 		$dept=$row['Dept_No'];
 		$add=$row['Address'];
-		$result1=mysql_query("select * from doctors where Employee_ID=\"$id\" ");
+		$result1=mysqli_query($link,"select * from doctors where Employee_ID=\"$id\" ");
 		//echo "l";
 		//echo "select * from doctors where Employee_ID=\"$id\" ";
-		$row=mysql_fetch_array($result1);
+		$row=mysqli_fetch_array($result1);
 		$batch=$row['Batch_No'];
 		echo "<div style=\"width:450px; float:left\"><h3 align=\"left\">Dr. $name</h3><p align=\"left\">Employee-ID: $id<br/>Batch No.: $batch<br/>Dept-No.: $dept<br/>Address: $add<br/>Contact: $contact</p></div>";
 		$count=$count-1;
@@ -290,13 +290,13 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_doctors")==0)))
 }
 else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_admin")==0)))
 {
-	$result=mysql_query("select * from employee where category=\"Adminstration\" ");
-	$count=mysql_num_rows($result);
+	$result=mysqli_query($link,"select * from employee where category=\"Adminstration\" ");
+	$count=mysqli_num_rows($result);
 	echo "<div style=\"width:990px; float:left\">";
 	echo "<h2 align=\"left\">Adminstration</h2>";
 	while($count)
 	{
-		$row=mysql_fetch_array($result);
+		$row=mysqli_fetch_array($result);
 		$name=$row['Name'];
 		$id=$row['Employee_ID'];
 		$contact=$row['Contact'];
@@ -309,13 +309,13 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_admin")==0)))
 }
 else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_staff")==0)))
 {
-	$result=mysql_query("select * from employee where category=\"Medical Staff\" ");
-	$count=mysql_num_rows($result);
+	$result=mysqli_query($link,"select * from employee where category=\"Medical Staff\" ");
+	$count=mysqli_num_rows($result);
 	echo "<div style=\"width:990px; float:left\">";
 	echo "<h2 align=\"left\">Medical Staff</h2>";
 	while($count)
 	{
-		$row=mysql_fetch_array($result);
+		$row=mysqli_fetch_array($result);
 		$name=$row['Name'];
 		$id=$row['Employee_ID'];
 		$contact=$row['Contact'];
@@ -331,8 +331,8 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"add_emp")==0)))
 	if(isset($_GET['option'])&&(strcmp($_GET['option'],"insert")==0))
 	{
 		$dept=$_POST['dept_no'];
-		$result=mysql_query("select max(Employee_ID) count from employee where Dept_No=\"$dept\";");
-		$row=mysql_fetch_array($result);
+		$result=mysqli_query($link,"select max(Employee_ID) count from employee where Dept_No=\"$dept\";");
+		$row=mysqli_fetch_array($result);
 		$count=$row['count'];
 		if($count>=0)
 		{
@@ -366,13 +366,13 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"add_emp")==0)))
 				header('Location: ?pid=add_emp');
 			}
 		}
-		mysql_query("insert into employee values (\"$Emp_ID\", \"$name\", \"$address\", \"$dob\", \"$contact\", \"$gender\", \"$salary\",\"$type\",\"$dept\" )");
-		$result=mysql_query("select * from Deparments where Dept_No=\"$dept\";");
-		$row=mysql_fetch_array($result);
+		mysqli_query($link,"insert into employee values (\"$Emp_ID\", \"$name\", \"$address\", \"$dob\", \"$contact\", \"$gender\", \"$salary\",\"$type\",\"$dept\" )");
+		$result=mysqli_query($link, "select * from Deparments where Dept_No=\"$dept\";");
+		$row=mysqli_fetch_array($result);
 		$noe=$row['noe']+1;
-		mysql_query("UPDATE Departments SET noe=$noe");
+		mysqli_query($link, "UPDATE Departments SET noe=$noe");
 		if(strcmp($type,"Doctor")==0)
-		mysql_query("insert into doctors values (\"$batch\",\"$Emp_ID\")");
+		mysqli_query($link,"insert into doctors values (\"$batch\",\"$Emp_ID\")");
 		if(strcmp($type,"Doctor")==0)
 		header('Location: ?pid=view_doctors');
 		else if(strcmp($type,"Adminstration")==0)
@@ -392,13 +392,13 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"add_emp")==0)))
 		echo "<tr><td><h4>Batch Number: </h4></td><td><input name=\"batch\" type=\"text\" size=50 placeholder=\"Batch Number of Doctor\"></td></tr>";
 		echo "<tr><td><h4>Salary: </h4></td><td><input name=\"salary\" type=\"text\" size=50 placeholder=\"Salary\"></td></tr>";
 		echo "<tr><td><h4>Dept. No: </h4></td><td><select name=\"dept_no\">";
-		$result=mysql_query("select count(*) count from departments");
-		$row=mysql_fetch_array($result);
+		$result=mysqli_query($link, "select count(*) count from departments");
+		$row=mysqli_fetch_array($result);
 		$count=$row['count'];		
-		$result=mysql_query("select Dept_No from departments");
+		$result=mysqli_query($link,"select Dept_No from departments");
 		for($i=0;$i<$count;$i=$i+1)
 		{
-				$row=mysql_fetch_array($result);
+				$row=mysqli_fetch_array($result);
 				$dept_no=$row['Dept_No'];
 				echo "<option>$dept_no</option>";
 		}
@@ -415,7 +415,7 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"del_emp")==0)))
 	{
 		$id=$_POST['id'];
 		if(isset($id))
-		mysql_query("delete from employee where Employee_ID='$id'; ");
+		mysqli_query($link, "delete from employee where Employee_ID='$id'; ");
 		header('Location: ?pid=del_emp');
 	}
 	else
@@ -430,7 +430,7 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"add_patient")==0)))
 {
 	if(isset($_GET['option'])&&(strcmp($_GET['option'],"insert")==0))
 	{
-		$result=mysql_query("select max(Patient_ID) count from patients;");
+		$result=mysqli_query($link, "select max(Patient_ID) count from patients;");
 		$name=$_POST['name'];
 		$address=$_POST['address'];
 		$dob=$_POST['dob'];
@@ -439,14 +439,14 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"add_patient")==0)))
 		else $contact="NULL";
 		$gender=$_POST['gender'];
 		$bg=$_POST['BG'];
-		$row=mysql_fetch_array($result);
+		$row=mysqli_fetch_array($result);
 		$id=$row['count'];
 		/*if(strlen($id)>=9)
 		$id="P0".($id+1);
 		else if(strlen($id)<9)
 		$id="P00".($id+1);*/
 		$id="P".(substr($id,1)+1);
-		mysql_query("insert into patients values (\"$id\", \"$name\", \"$address\", \"$dob\", \"$contact\", \"$gender\", \"$bg\")");
+		mysqli_query($link, "insert into patients values (\"$id\", \"$name\", \"$address\", \"$dob\", \"$contact\", \"$gender\", \"$bg\")");
 		header('Location: ?pid=view_patient');
 	}
 	else
@@ -471,7 +471,7 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"del_patient")==0)))
 	{
 		$id=$_POST['id'];
 		if(isset($id))
-		mysql_query("delete from patients where Patient_ID='$id'; ");
+		mysqli_query($link, "delete from patients where Patient_ID='$id'; ");
 		header('Location: ?pid=view_patient');
 	}
 	else
@@ -496,7 +496,7 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"mod_emp")==0)))
 		$gender=$_POST['gender'];
 		$salary=$_POST['salary'];
 		//echo "update Patients SET Name=\"$name\", Address=\"$address\", DOB=\"$dob\", Contact=\"$contact\", Gender=\"$gender\", Blood_Group=\"$bg\" where Patient_ID=$id;";
-		mysql_query("update Employee SET Name=\"$name\", Address=\"$address\", DOB=\"$dob\", Contact=\"$contact\", Gender=\"$gender\", Salary=\"$salary\" where Employee_ID=\"$id\" ");
+		mysqli_query($link, "update Employee SET Name=\"$name\", Address=\"$address\", DOB=\"$dob\", Contact=\"$contact\", Gender=\"$gender\", Salary=\"$salary\" where Employee_ID=\"$id\" ");
 		header('Location: ?pid=mod_emp');
 	}
 	else if(isset($_GET['option'])&&(strcmp($_GET['option'],"mod_form")==0))
@@ -504,10 +504,10 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"mod_emp")==0)))
 		$id=$_POST['id'];
 		if(isset($id))
 		{
-			$result=mysql_query("select * from employee where Employee_ID='$id'; ");
+			$result=mysqli_query($link, "select * from employee where Employee_ID='$id'; ");
 			if(isset($result))
 			{
-				$row=mysql_fetch_array($result);
+				$row=mysqli_fetch_array($result);
 				$name=$row['Name'];
 				$address=$row['Address'];
 				$dob=$row['DOB'];
@@ -554,7 +554,7 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"mod_patient")==0)))
 		$gender=$_POST['gender'];
 		$bg=$_POST['BG'];
 		//echo "update Patients SET Name=\"$name\", Address=\"$address\", DOB=\"$dob\", Contact=\"$contact\", Gender=\"$gender\", Blood_Group=\"$bg\" where Patient_ID=$id;";
-		mysql_query("update Patients SET Name=\"$name\", Address=\"$address\", DOB=\"$dob\", Contact=\"$contact\", Gender=\"$gender\", Blood_Group=\"$bg\" where Patient_ID=\"$id\" ");
+		mysqli_query($link, "update Patients SET Name=\"$name\", Address=\"$address\", DOB=\"$dob\", Contact=\"$contact\", Gender=\"$gender\", Blood_Group=\"$bg\" where Patient_ID=\"$id\" ");
 		header('Location: ?pid=view_patient');
 	}
 	else if(isset($_GET['option'])&&(strcmp($_GET['option'],"mod_form")==0))
@@ -562,10 +562,10 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"mod_patient")==0)))
 		$id=$_POST['id'];
 		if(isset($id))
 		{
-			$result=mysql_query("select * from patients where Patient_ID='$id'; ");
+			$result=mysqli_query($link, "select * from patients where Patient_ID='$id'; ");
 			if(isset($result))
 			{
-				$row=mysql_fetch_array($result);
+				$row=mysqli_fetch_array($result);
 				$name=$row['Name'];
 				$address=$row['Address'];
 				$dob=$row['DOB'];
@@ -618,9 +618,9 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_patient")==0)||(strcmp(
 	if((strcmp($_GET['pid'],"patient_details")==0))
 	{
 		$searchby=$_GET['id'];
-		$result=mysql_query("select * from patients where Patient_ID='$searchby'");
+		$result=mysqli_query($link, "select * from patients where Patient_ID='$searchby'");
 		echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
-		$row=mysql_fetch_array($result);
+		$row=mysqli_fetch_array($result);
 		$name=$row['Name'];
 		$eid=$row['Patient_ID'];
 		//$dept=$row['Dept_No'];
@@ -659,12 +659,12 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_patient")==0)||(strcmp(
 		if(!empty($searchby)&&(($searchby[0]=='P')||($searchby[0]=='p')))
 		{
 			if(empty($searchbyaname))
-			$result=mysql_query("select * from patients where Patient_ID='$searchby'");
-			else $result=mysql_query("select * from patients p, accompanies a where p.Patient_ID='$searchby' and p.Patient_ID=a.Patient_ID and a.Name LIKE '%$searchbyaname%'");
-			if(!empty($result) && mysql_num_rows($result)==1)
+			$result=mysqli_query($link, "select * from patients where Patient_ID='$searchby'");
+			else $result=mysqli_query($link, "select * from patients p, accompanies a where p.Patient_ID='$searchby' and p.Patient_ID=a.Patient_ID and a.Name LIKE '%$searchbyaname%'");
+			if(!empty($result) && mysqli_num_rows($result)==1)
 			{
 				echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
-				$row=mysql_fetch_array($result);
+				$row=mysqli_fetch_array($result);
 				$name=$row['Name'];
 				$eid=$row['Patient_ID'];
 				//$dept=$row['Dept_No'];
@@ -690,40 +690,40 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_patient")==0)||(strcmp(
 		if(!empty($searchby)&&($flag==0))
 		{
 			if(!empty($searchbysex)&&!empty($searchbyage)&&!empty($searchbyaname)&&!empty($searchbybg))
-			$result=mysql_query("select p.Name,p.Patient_ID,p.Gender,p.Contact,p.DOB,p.Address,p.Blood_Group from patients p, accompanies a where p.Name LIKE '%$searchby%' and p.Patient_ID=a.Patient_ID and a.Name LIKE '%$searchbyaname%' and p.Gender LIKE '$searchbysex' and floor(DATEDIFF(CURDATE(),p.DOB)/365)=$searchbyage and p.Blood_Group LIKE '$searchbybg'");
+			$result=mysqli_query($link, "select p.Name,p.Patient_ID,p.Gender,p.Contact,p.DOB,p.Address,p.Blood_Group from patients p, accompanies a where p.Name LIKE '%$searchby%' and p.Patient_ID=a.Patient_ID and a.Name LIKE '%$searchbyaname%' and p.Gender LIKE '$searchbysex' and floor(DATEDIFF(CURDATE(),p.DOB)/365)=$searchbyage and p.Blood_Group LIKE '$searchbybg'");
 			else if(!empty($searchbysex)&&!empty($searchbyage)&&!empty($searchbyaname))
-			$result=mysql_query("select p.Name,p.Patient_ID,p.Gender,p.Contact,p.DOB,p.Address,p.Blood_Group from patients p, accompanies a where p.Name LIKE '%$searchby%' and p.Patient_ID=a.Patient_ID and a.Name LIKE '%$searchbyaname%' and p.Gender LIKE '$searchbysex' and floor(DATEDIFF(CURDATE(),p.DOB)/365)=$searchbyage");
+			$result=mysqli_query($link, "select p.Name,p.Patient_ID,p.Gender,p.Contact,p.DOB,p.Address,p.Blood_Group from patients p, accompanies a where p.Name LIKE '%$searchby%' and p.Patient_ID=a.Patient_ID and a.Name LIKE '%$searchbyaname%' and p.Gender LIKE '$searchbysex' and floor(DATEDIFF(CURDATE(),p.DOB)/365)=$searchbyage");
 			else if(!empty($searchbysex)&&!empty($searchbybg)&&!empty($searchbyaname))
-			$result=mysql_query("select p.Name,p.Patient_ID,p.Gender,p.Contact,p.DOB,p.Address,p.Blood_Group from patients p, accompanies a where p.Name LIKE '%$searchby%' and p.Patient_ID=a.Patient_ID and a.Name LIKE '%$searchbyaname%' and p.Gender LIKE '$searchbysex' and p.Blood_Group LIKE '$searchbybg'");
+			$result=mysqli_query($link, "select p.Name,p.Patient_ID,p.Gender,p.Contact,p.DOB,p.Address,p.Blood_Group from patients p, accompanies a where p.Name LIKE '%$searchby%' and p.Patient_ID=a.Patient_ID and a.Name LIKE '%$searchbyaname%' and p.Gender LIKE '$searchbysex' and p.Blood_Group LIKE '$searchbybg'");
 			else if(!empty($searchbysex)&&!empty($searchbyage)&&!empty($searchbybg))
-			$result=mysql_query("select * from patients where Name LIKE '%$searchby%' and Gender LIKE '$searchbysex' and floor(DATEDIFF(CURDATE(),p.DOB)/365)=$searchbyage and Blood_Group LIKE '$searchbybg'");
+			$result=mysqli_query($link, "select * from patients where Name LIKE '%$searchby%' and Gender LIKE '$searchbysex' and floor(DATEDIFF(CURDATE(),p.DOB)/365)=$searchbyage and Blood_Group LIKE '$searchbybg'");
 			else if(!empty($searchbyaname)&&!empty($searchbyage)&&!empty($searchbybg))
-			$result=mysql_query("select p.Name,p.Patient_ID,p.Gender,p.Contact,p.DOB,p.Address,p.Blood_Group from patients p, accompanies a where p.Name LIKE '%$searchby%' and p.Patient_ID=a.Patient_ID and a.Name LIKE '%$searchbyaname%' and floor(DATEDIFF(CURDATE(),p.DOB)/365)=$searchbyage and p.Blood_Group LIKE '$searchbybg'");
+			$result=mysqli_query($link, "select p.Name,p.Patient_ID,p.Gender,p.Contact,p.DOB,p.Address,p.Blood_Group from patients p, accompanies a where p.Name LIKE '%$searchby%' and p.Patient_ID=a.Patient_ID and a.Name LIKE '%$searchbyaname%' and floor(DATEDIFF(CURDATE(),p.DOB)/365)=$searchbyage and p.Blood_Group LIKE '$searchbybg'");
 			else if(!empty($searchbysex)&&!empty($searchbybg))
-			$result=mysql_query("select * from patients where Name LIKE '%$searchby%' and Gender LIKE '$searchbysex' and Blood_Group LIKE '$searchbybg' ");
+			$result=mysqli_query($link, "select * from patients where Name LIKE '%$searchby%' and Gender LIKE '$searchbysex' and Blood_Group LIKE '$searchbybg' ");
 			else if(!empty($searchbysex)&&!empty($searchbyage))
-			$result=mysql_query("select * from patients where Name LIKE '%$searchby%' and Gender LIKE '$searchbysex' and floor(DATEDIFF(CURDATE(),DOB)/365)=$searchbyage");
+			$result=mysqli_query($link, "select * from patients where Name LIKE '%$searchby%' and Gender LIKE '$searchbysex' and floor(DATEDIFF(CURDATE(),DOB)/365)=$searchbyage");
 			else if(!empty($searchbybg)&&!empty($searchbyage))
-			$result=mysql_query("select * from patients where Name LIKE '%$searchby%' and Blood_Group LIKE '$searchbybg' and floor(DATEDIFF(CURDATE(),DOB)/365)=$searchbyage");
+			$result=mysqli_query($link, "select * from patients where Name LIKE '%$searchby%' and Blood_Group LIKE '$searchbybg' and floor(DATEDIFF(CURDATE(),DOB)/365)=$searchbyage");
 			else if(!empty($searchbysex)&&!empty($searchbyaname))
-			$result=mysql_query("select p.Name,p.Patient_ID,p.Gender,p.Contact,p.DOB,p.Address,p.Blood_Group from patients p, accompanies a where p.Name LIKE '%$searchby%' and p.Patient_ID=a.Patient_ID and a.Name LIKE '%$searchbyaname%' and p.Gender LIKE '$searchbysex' ");
+			$result=mysqli_query($link, "select p.Name,p.Patient_ID,p.Gender,p.Contact,p.DOB,p.Address,p.Blood_Group from patients p, accompanies a where p.Name LIKE '%$searchby%' and p.Patient_ID=a.Patient_ID and a.Name LIKE '%$searchbyaname%' and p.Gender LIKE '$searchbysex' ");
 			else if(!empty($searchbyage)&&!empty($searchbyaname))
-			$result=mysql_query("select p.Name,p.Patient_ID,p.Gender,p.Contact,p.DOB,p.Address,p.Blood_Group from patients p, accompanies a where p.Name LIKE '%$searchby%' and p.Patient_ID=a.Patient_ID and a.Name LIKE '%$searchbyaname%' and floor(DATEDIFF(CURDATE(),p.DOB)/365)=$searchbyage");
+			$result=mysqli_query($link, "select p.Name,p.Patient_ID,p.Gender,p.Contact,p.DOB,p.Address,p.Blood_Group from patients p, accompanies a where p.Name LIKE '%$searchby%' and p.Patient_ID=a.Patient_ID and a.Name LIKE '%$searchbyaname%' and floor(DATEDIFF(CURDATE(),p.DOB)/365)=$searchbyage");
 			else if(!empty($searchbyaname)&&!empty($searchbybg))
-			$result=mysql_query("select p.Name,p.Patient_ID,p.Gender,p.Contact,p.DOB,p.Address,p.Blood_Group from patients p, accompanies a where p.Name LIKE '%$searchby%' and p.Patient_ID=a.Patient_ID and a.Name LIKE '%$searchbyaname%' and p.Blood_Group LIKE '$searchbybg'");
+			$result=mysqli_query($link, "select p.Name,p.Patient_ID,p.Gender,p.Contact,p.DOB,p.Address,p.Blood_Group from patients p, accompanies a where p.Name LIKE '%$searchby%' and p.Patient_ID=a.Patient_ID and a.Name LIKE '%$searchbyaname%' and p.Blood_Group LIKE '$searchbybg'");
 			else if(!empty($searchbysex))
-			$result=mysql_query("select * from patients where Name LIKE '%$searchby%' and Gender LIKE '$searchbysex' ");
+			$result=mysqli_query($link, "select * from patients where Name LIKE '%$searchby%' and Gender LIKE '$searchbysex' ");
 			else if(!empty($searchbybg))
-			$result=mysql_query("select * from patients where Name LIKE '%$searchby%' and Blood_Group LIKE '$searchbybg' ");
+			$result=mysqli_query($link, "select * from patients where Name LIKE '%$searchby%' and Blood_Group LIKE '$searchbybg' ");
 			else if(!empty($searchbyage))
-			$result=mysql_query("select * from patients where Name LIKE '%$searchby%' and floor(DATEDIFF(CURDATE(),DOB)/365)=$searchbyage");
+			$result=mysqli_query($link, "select * from patients where Name LIKE '%$searchby%' and floor(DATEDIFF(CURDATE(),DOB)/365)=$searchbyage");
 			else if(!empty($searchbyaname))
-			$result=mysql_query("select p.Name,p.Patient_ID,p.Gender,p.Contact,p.DOB,p.Address,p.Blood_Group from patients p, accompanies a where p.Name LIKE '%$searchby%' and p.Patient_ID=a.Patient_ID and a.Name LIKE '%$searchbyaname%'");
-			else $result=mysql_query("select * from patients where Name LIKE '%$searchby%'");
-			if(!empty($result) && mysql_num_rows($result)==1)
+			$result=mysqli_query($link, "select p.Name,p.Patient_ID,p.Gender,p.Contact,p.DOB,p.Address,p.Blood_Group from patients p, accompanies a where p.Name LIKE '%$searchby%' and p.Patient_ID=a.Patient_ID and a.Name LIKE '%$searchbyaname%'");
+			else $result=mysqli_query($link, "select * from patients where Name LIKE '%$searchby%'");
+			if(!empty($result) && mysqli_num_rows($result)==1)
 			{
 				echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
-				$row=mysql_fetch_array($result);
+				$row=mysqli_fetch_array($result);
 				$name=$row['Name'];
 				$eid=$row['Patient_ID'];
 				//$dept=$row['Dept_No'];
@@ -745,13 +745,13 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_patient")==0)||(strcmp(
 				echo "</table>";
 				$flag=1;
 			}
-			else if(!empty($result) && mysql_num_rows($result)>1)
+			else if(!empty($result) && mysqli_num_rows($result)>1)
 			{
 				echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
 				echo "<div style=\"width:900px; float:left;\">";
-				for($i=0;$i<mysql_num_rows($result);$i=$i+1)
+				for($i=0;$i<mysqli_num_rows($result);$i=$i+1)
 				{
-					$row=mysql_fetch_array($result);
+					$row=mysqli_fetch_array($result);
 					$name=$row['Name'];
 					$eid=$row['Patient_ID'];
 					$dob=$row['DOB'];
@@ -778,11 +778,11 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_accompanies")==0)||(str
 	{
 		$id=$_GET['id'];
 		$name=$_GET['name'];
-		$result=mysql_query("select * from accompanies where Patient_ID='$id' && Name='$name' ");
-		if(!empty($result) && mysql_num_rows($result)==1)
+		$result=mysqli_query($link, "select * from accompanies where Patient_ID='$id' && Name='$name' ");
+		if(!empty($result) && mysqli_num_rows($result)==1)
 		{
 			echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
-			$row=mysql_fetch_array($result);
+			$row=mysqli_fetch_array($result);
 			$name=$row['Name'];
 			$eid=$row['Patient_ID'];
 			//$dept=$row['Dept_No'];
@@ -812,11 +812,11 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_accompanies")==0)||(str
 		$flag=0;
 		if(!empty($searchby)&&(($searchby[0]=='P')||($searchby[0]=='p')))
 		{
-			$result=mysql_query("select * from accompanies where Patient_ID='$searchby'");
-			if(!empty($result) && mysql_num_rows($result)==1)
+			$result=mysqli_query($link, "select * from accompanies where Patient_ID='$searchby'");
+			if(!empty($result) && mysqli_num_rows($result)==1)
 			{
 				echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
-				$row=mysql_fetch_array($result);
+				$row=mysqli_fetch_array($result);
 				$name=$row['Name'];
 				$eid=$row['Patient_ID'];
 				//$dept=$row['Dept_No'];
@@ -837,13 +837,13 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_accompanies")==0)||(str
 				echo "</table>";
 				$flag=1;
 			}
-			else if(!empty($result) && mysql_num_rows($result)>1)
+			else if(!empty($result) && mysqli_num_rows($result)>1)
 			{
 				echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
 				echo "<div style=\"width:900px; float:left;\">";
-				for($i=0;$i<mysql_num_rows($result);$i=$i+1)
+				for($i=0;$i<mysqli_num_rows($result);$i=$i+1)
 				{
-					$row=mysql_fetch_array($result);
+					$row=mysqli_fetch_array($result);
 					$name=$row['Name'];
 					$eid=$row['Patient_ID'];
 					$rel=$row['Relationship'];
@@ -858,11 +858,11 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_accompanies")==0)||(str
 		}
 		if(!empty($searchby)&&($flag==0))
 		{
-			$result=mysql_query("select * from patients p,accompanies a where p.Patient_ID=a.Patient_ID and p.Name LIKE '%$searchby%'");
-			if(!empty($result) && mysql_num_rows($result)==1)
+			$result=mysqli_query($link, "select * from patients p,accompanies a where p.Patient_ID=a.Patient_ID and p.Name LIKE '%$searchby%'");
+			if(!empty($result) && mysqli_num_rows($result)==1)
 			{
 				echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
-				$row=mysql_fetch_array($result);
+				$row=mysqli_fetch_array($result);
 				$name=$row['Name'];
 				$eid=$row['Patient_ID'];
 				//$dept=$row['Dept_No'];
@@ -883,13 +883,13 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_accompanies")==0)||(str
 				echo "</table>";
 				$flag=1;
 			}
-			else if(!empty($result) && mysql_num_rows($result)>1)
+			else if(!empty($result) && mysqli_num_rows($result)>1)
 			{
 				echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
 				echo "<div style=\"width:900px; float:left;\">";
-				for($i=0;$i<mysql_num_rows($result);$i=$i+1)
+				for($i=0;$i<mysqli_num_rows($result);$i=$i+1)
 				{
-					$row=mysql_fetch_array($result);
+					$row=mysqli_fetch_array($result);
 					$name=$row['Name'];
 					$eid=$row['Patient_ID'];
 					$rel=$row['Relationship'];
@@ -910,9 +910,9 @@ else if(isset($_GET['pid'])&&(strcmp($_GET['pid'],"logout")==0))
 {
 	$username=$_COOKIE['username'];
 	$sessionid=$_COOKIE['PHPSESSID'];
-	if(mysql_query("select * from session where username='$username' and id='$sessionid'"))
+	if(mysqli_query($link, "select * from session where username='$username' and id='$sessionid'"))
 	{
-		$result=mysql_query("delete from session where username='$username'and id='$sessionid'");
+		$result=mysqli_query($link, "delete from session where username='$username'and id='$sessionid'");
 		setcookie("username",$_POST['username'],time()-3600);
 		unset($_SESSION['PHPSESSID']);
 		header('Location: index.php');
@@ -923,12 +923,12 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_dept")==0)||(strcmp($_G
 {
 	if((strcmp($_GET['pid'],"view_dept")==0))
 	{
-		$result=mysql_query("select * from departments");
+		$result=mysqli_query($link, "select * from departments");
 		echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
 		echo "<div style=\"width:900px; float:left;\">";
-		for($i=0;$i<mysql_num_rows($result);$i=$i+1)
+		for($i=0;$i<mysqli_num_rows($result);$i=$i+1)
 		{
-			$row=mysql_fetch_array($result);
+			$row=mysqli_fetch_array($result);
 			$name=$row['Name'];
 			$d_id=$row['Dept_No'];
 			echo "<div style=\"width:900px; float:left;\">";
@@ -941,9 +941,9 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_dept")==0)||(strcmp($_G
 	else if((strcmp($_GET['pid'],"dept_details")==0))
 	{
 		$searchby=$_GET['id'];
-		$result=mysql_query("select * from departments where Dept_No='$searchby'");
+		$result=mysqli_query($link, "select * from departments where Dept_No='$searchby'");
 		echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
-		$row=mysql_fetch_array($result);
+		$row=mysqli_fetch_array($result);
 		$name=$row['Name'];
 		$d_id=$row['Dept_No'];
 		$loc=$row['Location'];
@@ -956,14 +956,14 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_dept")==0)||(strcmp($_G
 		//echo "<tr><td>Number of employees: </td><td>$nem</td></tr>";
 		echo "</table>";
 		echo "<h4 align=\"left\"><u>Employee Names</u>:</h4>";
-		$result2=mysql_query("select * from employee where Dept_No='$d_id'");
+		$result2=mysqli_query($link, "select * from employee where Dept_No='$d_id'");
 		echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
 		echo "<div style=\"width:900px; float:left;\">";
 		if(!empty($result2))
-		for($i=0;$i<mysql_num_rows($result2);$i=$i+1)
+		for($i=0;$i<mysqli_num_rows($result2);$i=$i+1)
 		{
 			$j=$i+1;
-			$row=mysql_fetch_array($result2);
+			$row=mysqli_fetch_array($result2);
 			$name=$row['Name'];
 			$eid=$row['Employee_ID'];
 			echo "<div style=\"width:900px; float:left;\">";
@@ -975,9 +975,9 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_dept")==0)||(strcmp($_G
 	else if((strcmp($_GET['pid'],"emp_details")==0))
 	{
 		$searchby=$_GET['id'];
-		$result=mysql_query("select * from employee where Employee_ID='$searchby'");
+		$result=mysqli_query($link, "select * from employee where Employee_ID='$searchby'");
 		echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
-		$row=mysql_fetch_array($result);
+		$row=mysqli_fetch_array($result);
 		$name=$row['Name'];
 		$eid=$row['Employee_ID'];
 		$add=$row['Address'];
@@ -985,8 +985,8 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_dept")==0)||(strcmp($_G
 		$con=$row['Contact'];
 		$sex=$row['Gender'];
 		$dept=$row['Dept_No'];
-		$dept1=mysql_query("select * from Departments where Dept_No='$dept'");
-		$row1=mysql_fetch_array($dept1);
+		$dept1=mysqli_query($link, "select * from Departments where Dept_No='$dept'");
+		$row1=mysqli_fetch_array($dept1);
 		$dept_n=$row1['Name'];
 		echo "<h3>Employee Details</h3>";
 		echo "<table border=5 cellpadding=1 cellspacing=0 style=\"margin:5px 0px 0px -3px;border-collapse: collapse;\">";
@@ -1010,10 +1010,10 @@ else if(isset($_GET['pid'])&&(strcmp($_GET['pid'],"del_dept")==0))
 	{
 		if(!empty($_POST['dept_id']))
 		$d_id=$_POST['dept_id'];
-		$res=mysql_query("select * from departments where Dept_No='$d_id';");
-		if(mysql_num_rows($res)!=0)
+		$res=mysqli_query($link, "select * from departments where Dept_No='$d_id';");
+		if(mysqli_num_rows($res)!=0)
 		{
-		mysql_query("delete from departments where Dept_No='$d_id';");
+		mysqli_query($link, "delete from departments where Dept_No='$d_id';");
 		header('Location: login.php?pid=view_dept');
 		}
 		else
@@ -1036,10 +1036,10 @@ else if(isset($_GET['pid'])&&(strcmp($_GET['pid'],"add_dept")==0))
 		$n=$_POST["nm"];
 		$i=$_POST["id"];
 		$l=$_POST["loc"];
-		$result=mysql_query("select * from departments where Dept_No='$i';");
-		if(mysql_num_rows($result)==0)
+		$result=mysqli_query($link, "select * from departments where Dept_No='$i';");
+		if(mysqli_num_rows($result)==0)
 		{
-			mysql_query("insert into Departments values (\"$n\",\"$l\",\"$i\",0);");
+			mysqli_query($link, "insert into Departments values (\"$n\",\"$l\",\"$i\",0);");
 			header('Location: login.php?pid=view_dept');
 		}
 		else
@@ -1053,7 +1053,7 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"mod_dept")==0)))
 		$id=$_GET['id'];
 		$name=$_POST['name'];
 		$loc=$_POST['loc'];
-		mysql_query("update Departments SET Name=\"$name\", Location=\"$loc\" where Dept_No=\"$id\";");
+		mysqli_query($link, "update Departments SET Name=\"$name\", Location=\"$loc\" where Dept_No=\"$id\";");
 		header('Location: ?pid=view_dept');
 	}
 	else if(isset($_GET['option'])&&(strcmp($_GET['option'],"mod_form")==0))
@@ -1061,10 +1061,10 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"mod_dept")==0)))
 		$id=$_POST['id'];
 		if(isset($id))
 		{
-			$result=mysql_query("select * from departments where Dept_No='$id'; ");
-			if(isset($result)&&(mysql_num_rows($result)!=0	))
+			$result=mysqli_query($link, "select * from departments where Dept_No='$id'; ");
+			if(isset($result)&&(mysqli_num_rows($result)!=0	))
 			{
-				$row=mysql_fetch_array($result);
+				$row=mysqli_fetch_array($result);
 				$name=$row['Name'];
 				$loc=$row['Location'];
 				echo("<h2 align=\"centre\"><u> Modify Department</u></h1>");
@@ -1105,21 +1105,21 @@ else if(isset($_GET['pid'])&&(strcmp($_GET['pid'],"allot_room")==0))
 	$type=$_POST["type"];
 	$id=$_POST["id"];
 	$date=$_POST["date"];
-	$res1=mysql_query("select * from patients where Patient_ID='$id';");
-	if(mysql_num_rows($res1)==0)
+	$res1=mysqli_query($link, "select * from patients where Patient_ID='$id';");
+	if(mysqli_num_rows($res1)==0)
 	{
 		echo "<script type=\"text/javascript\">alert(\"Invalid Patient ID\")</script>";
 	}
 	else
 	{
-	$res2=mysql_query("select * from room where ((type='$type') and (patient_id is null));");
-	if(mysql_num_rows($res2)!=0)
+	$res2=mysqli_query($link, "select * from room where ((type='$type') and (patient_id is null));");
+	if(mysqli_num_rows($res2)!=0)
 	{
-		$row=mysql_fetch_array($res2);
+		$row=mysqli_fetch_array($res2);
 		$r_no=$row['Room_No'];
-		mysql_query("insert into room_given values (\"$r_no\",\"$id\",'$date',null);");
-		mysql_query("update room SET Patient_ID=\"$id\" where Room_No=\"$r_no\";");
-		//if(mysql_affected_rows()!=0)
+		mysqli_query($link, "insert into room_given values (\"$r_no\",\"$id\",'$date',null);");
+		mysqli_query($link, "update room SET Patient_ID=\"$id\" where Room_No=\"$r_no\";");
+		//if(mysqli_affected_rows()!=0)
 		echo("Alloted Succesfully <br/> Room No.= ");
 		echo($r_no);
 	}
@@ -1142,23 +1142,23 @@ else if(isset($_GET['pid'])&&(strcmp($_GET['pid'],"allot_vehicle")==0))
 	$type=$_POST["type"];
 	$id=$_POST["id"];
 	$date=$_POST["date"];
-	$res1=mysql_query("select * from patients where Patient_ID='$id';");
-	if(mysql_num_rows($res1)==0)
+	$res1=mysqli_query($link, "select * from patients where Patient_ID='$id';");
+	if(mysqli_num_rows($res1)==0)
 	echo "<script type=\"text/javascript\">alert(\"Invalid Patient ID\")</script>";
 	else
 	{
-	$res3=mysql_query("select * from vehicle_given where id='$id' and return_date is null;");
-	if(mysql_num_rows($res3)!=0)
+	$res3=mysqli_query($link, "select * from vehicle_given where id='$id' and return_date is null;");
+	if(mysqli_num_rows($res3)!=0)
 	echo "<script type=\"text/javascript\">alert(\"Patient already has a vehicle issued !!! Return former to reissue.\")</script>";		
 	else
 	{
-	$res2=mysql_query("select * from vehicles where ((type='$type') and id is null);");
-	if(mysql_num_rows($res2)!=0)
+	$res2=mysqli_query($link, "select * from vehicles where ((type='$type') and id is null);");
+	if(mysqli_num_rows($res2)!=0)
 	{
-		$row=mysql_fetch_array($res2);
+		$row=mysqli_fetch_array($res2);
 		$reg_no=$row['Reg_No'];
-		mysql_query("insert into vehicle_given values (\"$reg_no\",\"$id\",'$date',null);");
-		mysql_query("update vehicles SET id=$id where Reg_No=\"$reg_no\";");
+		mysqli_query($link,"insert into vehicle_given values (\"$reg_no\",\"$id\",'$date',null);");
+		mysqli_query($link,"update vehicles SET id=$id where Reg_No=\"$reg_no\";");
 		echo("Alloted Succesfully <br/> Vehicle Reg No.= ");
 		echo($reg_no);
 	}
@@ -1186,11 +1186,11 @@ else if(isset($_GET['pid'])&&(strcmp($_GET['pid'],"allot_ms")==0))
 		$date=$_POST["date"];
 		$jtime=$_POST['jtime'];
 		$ltime=$_POST['ltime'];
-		$res1=mysql_query("select * from employee where Employee_ID='$id';");
-		$res2=mysql_query("select * from room where Room_No='$room';");
-		if((mysql_num_rows($res1)==0)||(mysql_num_rows($res2)==0))
+		$res1=mysqli_query($link,"select * from employee where Employee_ID='$id';");
+		$res2=mysqli_query($link,"select * from room where Room_No='$room';");
+		if((mysqli_num_rows($res1)==0)||(mysqli_num_rows($res2)==0))
 		{
-			if(mysql_num_rows($res1)==0)
+			if(mysqli_num_rows($res1)==0)
 			echo "<script type=\"text/javascript\">alert(\"Invalid Employee ID\")</script>";
 			else
 			echo "<script type=\"text/javascript\">alert(\"Invalid Room Number\")</script>";
@@ -1203,28 +1203,28 @@ else if(isset($_GET['pid'])&&(strcmp($_GET['pid'],"allot_ms")==0))
 		{
 			if((strcmp($id[0],'M')!=0)&&(strcmp($id[1],'S')!=0))
 			{
-				$res1=mysql_query("select * from room where Room_No='$room' and Patient_ID is null;");
-				if(mysql_num_rows($res1)!=0)
+				$res1=mysqli_query($link,"select * from room where Room_No='$room' and Patient_ID is null;");
+				if(mysqli_num_rows($res1)!=0)
 					echo "<script type=\"text/javascript\">alert(\"No Patient In Room !!! Doctor can't be assigned\")</script>";
 				else
 				{
 					//if(isset($res1))
-					$res2=mysql_query("select * from room where Room_No='$room';");
-					$row1=mysql_fetch_array($res2);
+					$res2=mysqli_query($link,"select * from room where Room_No='$room';");
+					$row1=mysqli_fetch_array($res2);
 					$patient=$row1['Patient_ID'];
-					$res=mysql_query("select * from doctors where employee_id='$id';");
-					$row=mysql_fetch_array($res);
+					$res=mysqli_query($link,"select * from doctors where employee_id='$id';");
+					$row=mysqli_fetch_array($res);
 					$batch=$row['Batch_No'];
 					//echo "batch_no=".$batch;
 					//echo "patient_id=".$patient;
-					mysql_query("insert into attended_by values('$patient','$batch','$date');");
-					mysql_query("insert into governed_by values(\"$id\",\"$room\",'$date','$jtime','$ltime');");
+					mysqli_query($link,"insert into attended_by values('$patient','$batch','$date');");
+					mysqli_query($link,"insert into governed_by values(\"$id\",\"$room\",'$date','$jtime','$ltime');");
 					echo "<script type=\"text/javascript\">alert(\"Entry added\")</script>";
 				}
 			}
 			else
 			{
-			mysql_query("insert into governed_by values(\"$id\",\"$room\",'$date','$jtime','$ltime');");
+			mysqli_query($link,"insert into governed_by values(\"$id\",\"$room\",'$date','$jtime','$ltime');");
 			echo "<script type=\"text/javascript\">alert(\"Entry added\")</script>";
 			}
 		}
@@ -1243,13 +1243,13 @@ else if(isset($_GET['pid'])&&(strcmp($_GET['pid'],"view_ms")==0))
 		if(!empty($_POST['room']))
 		$room=$_POST['room'];
 		//echo "room=".$room;
-		$res=mysql_query("select * from governed_by where Room_No='$room';");
-		if(mysql_num_rows($res)!=0)
+		$res=mysqli_query($link,"select * from governed_by where Room_No='$room';");
+		if(mysqli_num_rows($res)!=0)
 		{
 		echo("<br/><table border=1 cellpadding=0 cellspacing=0 height=10 align='centre'><tr><th>&nbsp&nbspEmployee ID&nbsp&nbsp</th><th>&nbsp&nbspRoom No.&nbsp&nbsp</th><th>&nbsp&nbspDate&nbsp&nbsp</th><th>&nbsp&nbspJoining Time&nbsp&nbsp</th><th>&nbsp&nbspLeaving Time&nbsp&nbsp</th></tr>");
-		for($i=0;$i<mysql_num_rows($res);$i=$i+1)
+		for($i=0;$i<mysqli_num_rows($res);$i=$i+1)
 		{
-		$row=mysql_fetch_array($res);
+		$row=mysqli_fetch_array($res);
 		$emp=$row['Employee_ID'];
 		$room=$row['Room_No'];
 		$date=$row['Date'];
@@ -1277,18 +1277,18 @@ else if(isset($_GET['pid'])&&(strcmp($_GET['pid'],"allot_doc")==0))
 		$pid=$_POST["pid"];
 		$eid=$_POST["eid"];
 		$date=$_POST["date"];
-		$pres=mysql_query("select * from patients where Patient_ID='$pid';");
-		$dres=mysql_query("select * from doctors where Employee_ID='$eid';");
-		$row=mysql_fetch_array($dres);
-		if(mysql_num_rows($pres)==0)
+		$pres=mysqli_query($link,"select * from patients where Patient_ID='$pid';");
+		$dres=mysqli_query($link,"select * from doctors where Employee_ID='$eid';");
+		$row=mysqli_fetch_array($dres);
+		if(mysqli_num_rows($pres)==0)
 		echo "<script type=\"text/javascript\">alert(\"Invalid Patient ID\")</script>";
-		else if(mysql_num_rows($dres)==0)
+		else if(mysqli_num_rows($dres)==0)
 		echo "<script type=\"text/javascript\">alert(\"Invalid Doctor ID\")</script>";
 		else
 		{
 		$batch=$row['Batch_No'];
-		mysql_query("insert into attended_by values('$pid','$batch','$date');");
-		if(mysql_affected_rows()==1)
+		mysqli_query($link,"insert into attended_by values('$pid','$batch','$date');");
+		if(mysqli_affected_rows()==1)
 		echo "<script type=\"text/javascript\">alert(\"Successfully Assigned\")</script>";
 		}
 	}
@@ -1306,18 +1306,18 @@ else if(isset($_GET['pid'])&&(strcmp($_GET['pid'],"unallot_room")==0))
 	$room=$_POST["room"];
 	//echo $room;
 	$date=$_POST["date"];
-	$res=mysql_query("select * from room_given where Room_No='$room' and Discharge_Date is null;");
-	$row=mysql_fetch_array($res);
+	$res=mysqli_query($link,"select * from room_given where Room_No='$room' and Discharge_Date is null;");
+	$row=mysqli_fetch_array($res);
 	$allot_date=$row['Allot_date'];
-	if(mysql_num_rows($res)==0)
+	if(mysqli_num_rows($res)==0)
 	echo "<script type=\"text/javascript\">alert(\"Can't Unallot !! \\nEntered room is invalid or currently vacant\")</script>";
 	else if(strcmp($allot_date,$date)>0)
 	echo "<script type=\"text/javascript\">alert(\"Entered Return Date is invalid !! It must be after allotment date\")</script>";
 	else
 	{
-	mysql_query("update room set patient_id=null where Room_No='$room';");
-	mysql_query("update room_given set discharge_date='$date' where Room_No='$room' and discharge_date is null;");
-	if(mysql_affected_rows()==1)
+	mysqli_query($link,"update room set patient_id=null where Room_No='$room';");
+	mysqli_query($link,"update room_given set discharge_date='$date' where Room_No='$room' and discharge_date is null;");
+	if(mysqli_affected_rows()==1)
 	echo "<script type=\"text/javascript\">alert(\"Patient Discharged from room\")</script>";
 	}
 	}
@@ -1335,18 +1335,18 @@ else if(isset($_GET['pid'])&&(strcmp($_GET['pid'],"unallot_vehicle")==0))
 	$reg=$_POST["reg"];
 	//echo $room;
 	$date=$_POST["date"];
-	$res=mysql_query("select * from vehicle_given where Reg_No='$reg' and Return_Date is null;");
-	$row=mysql_fetch_array($res);
+	$res=mysqli_query($link,"select * from vehicle_given where Reg_No='$reg' and Return_Date is null;");
+	$row=mysqli_fetch_array($res);
 	$allot_date=$row['Allot_date'];
-	if(mysql_num_rows($res)==0)
+	if(mysqli_num_rows($res)==0)
 	echo "<script type=\"text/javascript\">alert(\"Can't Unallot !! \\n Entered vehicle is invalid or currently unalloted to anyone\")</script>";
 	else if(strcmp($allot_date,$date)>0)
 	echo "<script type=\"text/javascript\">alert(\"Entered Return Date is invalid !! It must be after allotment date\")</script>";
 	else
 	{
-	mysql_query("update vehicles set ID=null where Reg_No='$reg';");
-	mysql_query("update vehicle_given set return_date='$date' where Reg_No='$reg' and return_date is null;");
-	if(mysql_affected_rows()==1)
+	mysqli_query($link,"update vehicles set ID=null where Reg_No='$reg';");
+	mysqli_query($link,"update vehicle_given set return_date='$date' where Reg_No='$reg' and return_date is null;");
+	if(mysqli_affected_rows()==1)
 	echo "<script type=\"text/javascript\">alert(\"vehicle returned !! \")</script>";
 	}
 	}
@@ -1363,10 +1363,10 @@ else if(isset($_GET['pid']) && strcmp($_GET['pid'],"create_report") == 0)
 	echo "<td><p>Patient ID: <input type=\"text\" name=\"PID\" size=\"15\" maxlength=\"15\" required/></p>";
 	echo "</tr>";
 	echo "<tr><td>Dept No.</td><td><select name=\"dept_no\">";
-	$result=mysql_query("select * from departments");
-	for($i=0;$i<mysql_num_rows($result);$i=$i+1)
+	$result=mysqli_query($link,"select * from departments");
+	for($i=0;$i<mysqli_num_rows($result);$i=$i+1)
 	{
-		$row=mysql_fetch_array($result);
+		$row=mysqli_fetch_array($result);
 		$dept=$row['Dept_No'];
 		echo "<option>$dept</option>";
 	}
@@ -1377,26 +1377,26 @@ else if(isset($_GET['pid']) && strcmp($_GET['pid'],"create_report") == 0)
 	if(isset($_POST['PID'])&&isset($_POST['dept_no']))
 	{
 		//$date=$_POST['date'];
-		$sel=mysql_query("SELECT curdate() date");
-		$date=mysql_fetch_array($sel);
+		$sel=mysqli_query($link,"SELECT curdate() date");
+		$date=mysqli_fetch_array($sel);
 		$date=$date['date'];
-		$cal=mysql_query("SELECT max(Report_No) R FROM medical_report");
-		$row=mysql_fetch_array($cal);
+		$cal=mysqli_query($link,"SELECT max(Report_No) R FROM medical_report");
+		$row=mysqli_fetch_array($cal);
 		$val=$row['R'];
 		$r_num="R".(substr($val,1)+1);
 		$pid=$_POST['PID'];
 		$dept_no=$_POST['dept_no'];
-		$check = mysql_query("SELECT * FROM patients where Patient_ID='$pid'");
-		//$check1 = mysql_query("SELECT * FROM medical_report where Patient_ID='$pid'");
-		$row=mysql_num_rows($check);
-		//$row1=mysql_num_rows($check1);
+		$check = mysqli_query($link,"SELECT * FROM patients where Patient_ID='$pid'");
+		//$check1 = mysqli_query($link,"SELECT * FROM medical_report where Patient_ID='$pid'");
+		$row=mysqli_num_rows($check);
+		//$row1=mysqli_num_rows($check1);
 		if($row>0)
 		{
 			$query = "INSERT INTO medical_report SET Patient_ID='$pid', Report_No='$r_num', R_date='$date'";
 			
-			$add=mysql_query($query);
+			$add=mysqli_query($link,$query);
 			$query1 = "INSERT INTO give_details SET Department_No='$dept_no', Report_No='$r_num'";
-			$add1=mysql_query($query1);
+			$add1=mysqli_query($link,$query1);
 			echo "<script type=\"text/javascript\">alert(\"Report No. $r_num has been added.\")</script>";
 			
 		}
@@ -1413,10 +1413,10 @@ else if(isset($_GET['pid']) && strcmp($_GET['pid'],"mod_report") == 0)
 	echo "<td><p>Report No.: <input type=\"text\" name=\"R_num\" size=\"15\" maxlength=\"15\" required/></p>";
 	echo "</tr>";
 	echo "<tr><td><p>Dept number: <select name=\"dept\">";
-	$result=mysql_query("select * from departments");
-	for($i=0;$i<mysql_num_rows($result);$i=$i+1)
+	$result=mysqli_query($link,"select * from departments");
+	for($i=0;$i<mysqli_num_rows($result);$i=$i+1)
 	{
-		$row=mysql_fetch_array($result);
+		$row=mysqli_fetch_array($result);
 		$dept=$row['Dept_No'];
 		echo "<option>$dept</option>";
 	}
@@ -1438,10 +1438,10 @@ else if(isset($_GET['pid']) && strcmp($_GET['pid'],"mod_report") == 0)
 		$roomnum=$_POST['Room_num'];
 		$diet=$_POST['Diet'];
 		//echo $rnum;
-		$check=mysql_query("SELECT * FROM give_details where Report_No='$rnum'");
-		if(mysql_num_rows($check)!=0)
+		$check=mysqli_query($link,"SELECT * FROM give_details where Report_No='$rnum'");
+		if(mysqli_num_rows($check)!=0)
 		{
-			mysql_query("UPDATE give_details SET Department_No='$dept' where Report_No='$rnum'");
+			mysqli_query($link,"UPDATE give_details SET Department_No='$dept' where Report_No='$rnum'");
 			if(isset($roomnum)||isset($diet))
 			{
 				if(!strcmp($roomnum,"")&&!strcmp($diet,""))
@@ -1453,8 +1453,8 @@ else if(isset($_GET['pid']) && strcmp($_GET['pid'],"mod_report") == 0)
 					$query = "UPDATE medical_report SET Diet='$diet' where Report_No='$rnum'";
 					//echo $query;
 				}
-				$add=mysql_query($query);
-				//echo mysql_affected_rows();
+				$add=mysqli_query($link,$query);
+				//echo mysqli_affected_rows();
 				echo "<script type=\"text/javascript\">alert(\"Data Updated.\")</script>";
 			}
 		}
@@ -1481,16 +1481,16 @@ else if(isset($_GET['pid']) && strcmp($_GET['pid'],"add_date") == 0)
 	{
 		$date=$_POST['date'];
 		$rnum=$_POST['num'];
-		$result=mysql_query("SELECT * FROM medical_report where Report_No='$rnum'");
-		$row=mysql_fetch_array($result);
+		$result=mysqli_query($link,"SELECT * FROM medical_report where Report_No='$rnum'");
+		$row=mysqli_fetch_array($result);
 		$rdate=$row['R_date'];
 		if(strcmp($rdate,$date)>0)
 			echo "<script type=\"text/javascript\">alert(\"Invalid Date.\")</script>";
 		else
 		{
 			$query = "UPDATE medical_report SET C_date='$date' where Report_No='$rnum'";
-			$add=mysql_query($query);
-			if(mysql_affected_rows()==0)
+			$add=mysqli_query($link, $query);
+			if(mysqli_affected_rows()==0)
 				echo "<script type=\"text/javascript\">alert(\"Report Not Found.\")</script>";
 			else
 				echo "<script type=\"text/javascript\">alert(\"Data Updated.\")</script>";
@@ -1518,17 +1518,17 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_report")==0)||(strcmp($
 	if((strcmp($_GET['pid'],"patient_report")==0))
 	{
 		$searchby=$_GET['id'];
-		$result=mysql_query("select * from medical_report where Report_No='$searchby'");
+		$result=mysqli_query($link,"select * from medical_report where Report_No='$searchby'");
 		echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
-		$row=mysql_fetch_array($result);
+		$row=mysqli_fetch_array($result);
 		$num=$row['Report_No'];
 		$id=$row['Patient_ID'];
-		$result2=mysql_query("select * from patients where Patient_ID='$id'");
-		$result4=mysql_query("select * from diagnosis where Report_No='$num'");
-		$dept=mysql_query("select * from departments d,give_details g where g.Report_No='$num' and g.Department_No=d.Dept_No");
-		$deptrow=mysql_fetch_array($dept);
+		$result2=mysqli_query($link,"select * from patients where Patient_ID='$id'");
+		$result4=mysqli_query($link,"select * from diagnosis where Report_No='$num'");
+		$dept=mysqli_query($link,"select * from departments d,give_details g where g.Report_No='$num' and g.Department_No=d.Dept_No");
+		$deptrow=mysqli_fetch_array($dept);
 		$deptname=$deptrow['Name'];
-		$row2=mysql_fetch_array($result2);
+		$row2=mysqli_fetch_array($result2);
 		//$dept=$row['Dept_No'];
 		$name=$row2['Name'];
 		$dob=$row2['DOB'];
@@ -1537,20 +1537,20 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_report")==0)||(strcmp($
 		$date=$row['R_date'];
 		$cdate=$row['C_date'];
 		$room=$row['Room_No'];
-		$result3=mysql_query("select * from room where Room_No='$room'");
-		$row3=mysql_fetch_array($result3);
-		$result5=mysql_query("select * from Room_Given where Patient_ID='$id'");
-		$row5=mysql_fetch_array($result5);
+		$result3=mysqli_query($link,"select * from room where Room_No='$room'");
+		$row3=mysqli_fetch_array($result3);
+		$result5=mysqli_query($link,"select * from Room_Given where Patient_ID='$id'");
+		$row5=mysqli_fetch_array($result5);
 		$allotdate=$row5['Allot_date'];
 		$disdate=$row5['Discharge_date'];
 		$roomtype=$row3['Type'];
 		$diet=$row['Diet'];
 		//$pay=$row['Payment'];
 		
-		$cost1=mysql_query("select b.Rent from medical_report a, room b where a.Patient_ID=b.Patient_ID and Report_No='$num'");
-		$costrow1=mysql_fetch_array($cost1);
-		$days=mysql_query("select DATEDIFF('$disdate','$allotdate') as day;");
-		$dayrow=mysql_fetch_array($days);
+		$cost1=mysqli_query($link,"select b.Rent from medical_report a, room b where a.Patient_ID=b.Patient_ID and Report_No='$num'");
+		$costrow1=mysqli_fetch_array($cost1);
+		$days=mysqli_query($link,"select DATEDIFF('$disdate','$allotdate') as day;");
+		$dayrow=mysqli_fetch_array($days);
 		$days=$dayrow['day'];
 		if($days==0)
 		{
@@ -1558,12 +1558,12 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_report")==0)||(strcmp($
 		}
 		$room_cost=$costrow1['Rent']*$days;
 		
-		$cost1=mysql_query("select b.Rent from medical_report a, vehicles b where a.Patient_ID=b.ID and Report_No='$num'");
-		$costrow1=mysql_fetch_array($cost1);
-		$days1=mysql_query("select b.Allot_date,b.Return_date from medical_report a,vehicle_given b where a.Patient_ID=b.ID and Report_No='$num'");
-		$days=mysql_fetch_array($days1);
-		$days=mysql_query("select datediff('$days[Return_date]','$days[Allot_date]') as day;");
-		$dayrow=mysql_fetch_array($days);
+		$cost1=mysqli_query($link,"select b.Rent from medical_report a, vehicles b where a.Patient_ID=b.ID and Report_No='$num'");
+		$costrow1=mysqli_fetch_array($cost1);
+		$days1=mysqli_query($link,"select b.Allot_date,b.Return_date from medical_report a,vehicle_given b where a.Patient_ID=b.ID and Report_No='$num'");
+		$days=mysqli_fetch_array($days1);
+		$days=mysqli_query($link,"select datediff('$days[Return_date]','$days[Allot_date]') as day;");
+		$dayrow=mysqli_fetch_array($days);
 		$days=$dayrow['day'];
 		if($days==0)
 		{
@@ -1595,9 +1595,9 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_report")==0)||(strcmp($
 		echo "<td><table border=\"2\">";
 		echo "<tr><th>Test Date</th><th>Test Name</th><th>Result</th><th>Cost</th></tr>";
 		$total=$room_cost+$veh_cost;
-		for($i=0;$i<mysql_num_rows($result4);$i=$i+1)
+		for($i=0;$i<mysqli_num_rows($result4);$i=$i+1)
 		{
-			$row4=mysql_fetch_array($result4);
+			$row4=mysqli_fetch_array($result4);
 			$date=$row4['Test_date'];
 			$name=$row4['Tests'];
 			$res=$row4['T_result'];
@@ -1628,19 +1628,19 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_report")==0)||(strcmp($
 		$flag=0;
 		if(!empty($searchby)&&(($searchby[0]=='R')||($searchby[0]=='r')))
 		{
-			$result=mysql_query("select * from medical_report where Report_No='$searchby'");
-			if(!empty($result) && mysql_num_rows($result)==1)
+			$result=mysqli_query($link,"select * from medical_report where Report_No='$searchby'");
+			if(!empty($result) && mysqli_num_rows($result)==1)
 			{
 				echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
-				$row=mysql_fetch_array($result);
+				$row=mysqli_fetch_array($result);
 				$num=$row['Report_No'];
 				$id=$row['Patient_ID'];
-				$result2=mysql_query("select * from patients where Patient_ID='$id'");
-				$result4=mysql_query("select * from diagnosis where Report_No='$num'");
-				$dept=mysql_query("select * from departments d,give_details g where g.Report_No='$num' and g.Department_No=d.Dept_No");
-				$deptrow=mysql_fetch_array($dept);
+				$result2=mysqli_query($link,"select * from patients where Patient_ID='$id'");
+				$result4=mysqli_query($link,"select * from diagnosis where Report_No='$num'");
+				$dept=mysqli_query($link,"select * from departments d,give_details g where g.Report_No='$num' and g.Department_No=d.Dept_No");
+				$deptrow=mysqli_fetch_array($dept);
 				$deptname=$deptrow['Name'];
-				$row2=mysql_fetch_array($result2);
+				$row2=mysqli_fetch_array($result2);
 				//$dept=$row['Dept_No'];
 				$name=$row2['Name'];
 				$dob=$row2['DOB'];
@@ -1649,19 +1649,19 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_report")==0)||(strcmp($
 				$date=$row['R_date'];
 				$cdate=$row['C_date'];
 				$room=$row['Room_No'];
-				$result3=mysql_query("select * from room where Room_No='$room'");
-				$row3=mysql_fetch_array($result3);
-				$result5=mysql_query("select * from Room_Given where Patient_ID='$id'");
-				$row5=mysql_fetch_array($result5);
+				$result3=mysqli_query($link,"select * from room where Room_No='$room'");
+				$row3=mysqli_fetch_array($result3);
+				$result5=mysqli_query($link,"select * from Room_Given where Patient_ID='$id'");
+				$row5=mysqli_fetch_array($result5);
 				$allotdate=$row5['Allot_date'];
 				$disdate=$row5['Discharge_date'];
 				$roomtype=$row3['Type'];
 				$diet=$row['Diet'];
 				//$pay=$row['Payment'];
-				$cost1=mysql_query("select b.Rent from medical_report a, room b where a.Patient_ID=b.Patient_ID and Report_No='$num'");
-				$costrow1=mysql_fetch_array($cost1);
-				$days=mysql_query("select DATEDIFF('$disdate','$allotdate') as day;");
-				$dayrow=mysql_fetch_array($days);
+				$cost1=mysqli_query($link,"select b.Rent from medical_report a, room b where a.Patient_ID=b.Patient_ID and Report_No='$num'");
+				$costrow1=mysqli_fetch_array($cost1);
+				$days=mysqli_query($link,"select DATEDIFF('$disdate','$allotdate') as day;");
+				$dayrow=mysqli_fetch_array($days);
 				$days=$dayrow['day'];
 				if($days==0)
 				{
@@ -1669,12 +1669,12 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_report")==0)||(strcmp($
 				}
 				$room_cost=$costrow1['Rent']*$days;
 				
-				$cost1=mysql_query("select b.Rent from medical_report a, vehicles b where a.Patient_ID=b.ID and Report_No='$num'");
-				$costrow1=mysql_fetch_array($cost1);
-				$days1=mysql_query("select b.Allot_date,b.Return_date from medical_report a,vehicle_given b where a.Patient_ID=b.ID and Report_No='$num'");
-				$days=mysql_fetch_array($days1);
-				$days=mysql_query("select datediff('$days[Return_date]','$days[Allot_date]') as day;");
-				$dayrow=mysql_fetch_array($days);
+				$cost1=mysqli_query($link,"select b.Rent from medical_report a, vehicles b where a.Patient_ID=b.ID and Report_No='$num'");
+				$costrow1=mysqli_fetch_array($cost1);
+				$days1=mysqli_query($link,"select b.Allot_date,b.Return_date from medical_report a,vehicle_given b where a.Patient_ID=b.ID and Report_No='$num'");
+				$days=mysqli_fetch_array($days1);
+				$days=mysqli_query($link,"select datediff('$days[Return_date]','$days[Allot_date]') as day;");
+				$dayrow=mysqli_fetch_array($days);
 				$days=$dayrow['day'];
 				if($days==0)
 				{
@@ -1703,9 +1703,9 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"view_report")==0)||(strcmp($
 				echo "<td><table border=\"2\">";
 				echo "<tr><th>Test Date</th><th>Test Name</th><th>Result</th><th>Cost</th></tr>";
 				$total=$room_cost+$veh_cost;
-				for($i=0;$i<mysql_num_rows($result4);$i=$i+1)
+				for($i=0;$i<mysqli_num_rows($result4);$i=$i+1)
 				{
-					$row4=mysql_fetch_array($result4);
+					$row4=mysqli_fetch_array($result4);
 					$date=$row4['Test_date'];
 					$name=$row4['Tests'];
 					$res=$row4['T_result'];
@@ -1743,10 +1743,10 @@ else if(isset($_GET['pid']) && strcmp($_GET['pid'],"del_report") == 0)
 			$search=$_POST['search_val'];
 			if(isset($search[0])&&($search[0]=='R' || $search[0]=='r'))
 			{					
-				$result=mysql_query("select * from medical_report where Report_No='$search'");						
-				if(mysql_num_rows($result)==1)
+				$result=mysqli_query($link,"select * from medical_report where Report_No='$search'");						
+				if(mysqli_num_rows($result)==1)
 				{
-					$query=mysql_query("delete from medical_report where Report_No='$search'");
+					$query=mysqli_query($link,"delete from medical_report where Report_No='$search'");
 					echo "<script type=\"text/javascript\">alert(\"Medical report deleted.\")</script>";
 				}					
 				else
@@ -1756,25 +1756,25 @@ else if(isset($_GET['pid']) && strcmp($_GET['pid'],"del_report") == 0)
 			}					
 			else if(isset($search[0]))
 			{
-				$result=mysql_query("select * from patients where Name='$search'");						
-				if(mysql_num_rows($result)==1)
+				$result=mysqli_query($link,"select * from patients where Name='$search'");						
+				if(mysqli_num_rows($result)==1)
 				{
-					$row=mysql_fetch_array($result);
+					$row=mysqli_fetch_array($result);
 					$id=$row['Patient_ID'];
-					$query=mysql_query("delete from medical_report where Patient_ID='$id'");
-					if(mysql_affected_rows()==0)
+					$query=mysqli_query($link,"delete from medical_report where Patient_ID='$id'");
+					if(mysqli_affected_rows()==0)
 						echo "<script type=\"text/javascript\">alert(\"Data Not Found.\")</script>";
 					else
 						echo "<script type=\"text/javascript\">alert(\"Medical Report Deleted.\")</script>";
 				}					
-				else if(mysql_num_rows($result)>=1)
+				else if(mysqli_num_rows($result)>=1)
 				{
 					echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
 					echo "<div style=\"width:900px; float:left;\">";
 					echo "<h2 align=\"left\">Click the Patient-ID to delete !!!</h2>";
-					for($i=0;$i<mysql_num_rows($result);$i=$i+1)
+					for($i=0;$i<mysqli_num_rows($result);$i=$i+1)
 					{
-						$val=mysql_fetch_array($result);
+						$val=mysqli_fetch_array($result);
 						$id=$val['Patient_ID'];
 						echo "<div style=\"width:900px; float:left;\">";
 						echo "<h3 align=\"left\"><a href=\"?pid=del_report&id=$id\">$id</a></h3>";
@@ -1794,8 +1794,8 @@ else if(isset($_GET['pid']) && strcmp($_GET['pid'],"del_report") == 0)
 		if(isset($_GET['id']))
 		{
 			$search=$_GET['id'];
-			$query=mysql_query("delete from medical_report where Patient_ID='$search'");
-			if(mysql_affected_rows()==0)
+			$query=mysqli_query($link,"delete from medical_report where Patient_ID='$search'");
+			if(mysqli_affected_rows()==0)
 				echo "<script type=\"text/javascript\">alert(\"Data Not Found.\")</script>";
 			else
 				echo "<script type=\"text/javascript\">alert(\"Medical Report Deleted.\")</script>";
@@ -1813,21 +1813,21 @@ else if(isset($_GET['pid']) && strcmp($_GET['pid'],"view_test") == 0)
 		
 			if((isset($searchby[0]))&&($searchby[0]=='R' || $searchby[0]=='r'))
 			{				
-				$result=mysql_query("select * from diagnosis where Report_No='$searchby'");
-				if(!empty($result) && mysql_num_rows($result)==1)
+				$result=mysqli_query($link,"select * from diagnosis where Report_No='$searchby'");
+				if(!empty($result) && mysqli_num_rows($result)==1)
 				{
 					
 					echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">"; 
-					$row=mysql_fetch_array($result);
+					$row=mysqli_fetch_array($result);
 					$date=$row['Test_date'];
 					$test=$row['Tests'];
 					$tresult=$row['T_result'];
 					$cost=$row['Cost'];
-					$result1=mysql_query("select * from medical_report where Report_No='$searchby'");
-					$row1=mysql_fetch_array($result1);
+					$result1=mysqli_query($link,"select * from medical_report where Report_No='$searchby'");
+					$row1=mysqli_fetch_array($result1);
 					$id=$row1['Patient_ID'];
-					$result2=mysql_query("select * from Patients where Patient_ID='$id'");
-					$row2=mysql_fetch_array($result2);
+					$result2=mysqli_query($link,"select * from Patients where Patient_ID='$id'");
+					$row2=mysqli_fetch_array($result2);
 					$name=$row2['Name'];
 					echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
 					echo "<h3>Diagnosis Details</h3>";
@@ -1840,13 +1840,13 @@ else if(isset($_GET['pid']) && strcmp($_GET['pid'],"view_test") == 0)
 					echo "<tr><td>Cost: </td><td>$cost</td></tr>";
 					echo "</table>";
 				}
-				else if(!empty($result) && mysql_num_rows($result) > 1)
+				else if(!empty($result) && mysqli_num_rows($result) > 1)
 				{
 					echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
 					echo "<div style=\"width:900px; float:left;\">";
-					for($i=0;$i<mysql_num_rows($result);$i=$i+1)
+					for($i=0;$i<mysqli_num_rows($result);$i=$i+1)
 					{
-						$row=mysql_fetch_array($result);
+						$row=mysqli_fetch_array($result);
 						$name=$row['Tests'];
 						$date=$row['Test_date'];
 						$rnum=$row['Report_No'];
@@ -1873,15 +1873,15 @@ else if(isset($_GET['pid']) && strcmp($_GET['pid'],"tests_details") == 0)
 	$name=$_GET['test'];
 	$date=$_GET['date'];
 	$rnum=$_GET['rnum'];
-	$result=mysql_query("select * from diagnosis where Report_No='$rnum' and Test_date='$date' and Tests='$name'");
-	$row=mysql_fetch_array($result);
+	$result=mysqli_query($link,"select * from diagnosis where Report_No='$rnum' and Test_date='$date' and Tests='$name'");
+	$row=mysqli_fetch_array($result);
 	$tresult=$row['T_result'];
 	$cost=$row['Cost'];
-	$result1=mysql_query("select * from medical_report where Report_No='$rnum'");
-	$row1=mysql_fetch_array($result1);
+	$result1=mysqli_query($link,"select * from medical_report where Report_No='$rnum'");
+	$row1=mysqli_fetch_array($result1);
 	$id=$row1['Patient_ID'];
-	$result2=mysql_query("select * from Patients where Patient_ID='$id'");
-	$row2=mysql_fetch_array($result2);
+	$result2=mysqli_query($link,"select * from Patients where Patient_ID='$id'");
+	$row2=mysqli_fetch_array($result2);
 	$pname=$row2['Name'];
 	echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
 	echo "<h3>Diagnosis Details</h3>";
@@ -1926,8 +1926,8 @@ else if(isset($_GET['pid']) && strcmp($_GET['pid'],"add_test") == 0)
 		$result=$_POST['result'];
 		$r_num=$_POST['R_num'];
 		$cost=$_POST['cost'];
-		$check = mysql_query("SELECT * FROM medical_report where Report_No='$r_num'");
-		$row=mysql_fetch_array($check);
+		$check = mysqli_query($link,"SELECT * FROM medical_report where Report_No='$r_num'");
+		$row=mysqli_fetch_array($check);
 		$rdate=$row['R_date'];
 		if(strcmp($rdate,$date)>0)
 		{
@@ -1938,7 +1938,7 @@ else if(isset($_GET['pid']) && strcmp($_GET['pid'],"add_test") == 0)
 			if($row>0)
 			{
 				$query = "INSERT INTO diagnosis SET Test_date='$date', Tests='$name', T_result='$result', Report_No='$r_num', Cost='$cost'";
-				$add=mysql_query($query);
+				$add=mysqli_query($link, $query);
 				echo "<script type=\"text/javascript\">alert(\"Data Added.\")</script>";
 				
 			}
@@ -1976,8 +1976,8 @@ else if(isset($_GET['pid']) && strcmp($_GET['pid'],"add_result") == 0)
 		$result=$_POST['result'];
 		$r_num=$_POST['R_num'];
 		$query = "UPDATE diagnosis SET T_result='$result' where Test_date='$date' and Tests='$name' and Report_No='$r_num'";
-		$add=mysql_query($query);
-		if(mysql_affected_rows()==0)
+		$add=mysqli_query($link, $query);
+		if(mysqli_affected_rows()==0)
 			echo "<script type=\"text/javascript\">alert(\"Data Not Found.\")</script>";
 		else
 			echo "<script type=\"text/javascript\">alert(\"Data Updated.\")</script>";
@@ -1992,23 +1992,23 @@ else if(isset($_GET['pid']) && strcmp($_GET['pid'],"del_test") == 0)
 		if(isset($_GET['option']) && strcmp($_GET['option'],"search_val")==0)
 		{
 			$search=$_POST['search_val'];			
-				$result=mysql_query("select * from diagnosis where Report_No='$search'");						
-				if(mysql_num_rows($result)==1)
+				$result=mysqli_query($link,"select * from diagnosis where Report_No='$search'");						
+				if(mysqli_num_rows($result)==1)
 				{
-					$query=mysql_query("delete from medical_report where Report_No='$search'");
-					if(mysql_affected_rows()==0)
+					$query=mysqli_query($link,"delete from medical_report where Report_No='$search'");
+					if(mysqli_affected_rows()==0)
 						echo "<script type=\"text/javascript\">alert(\"Data Not Found.\")</script>";
 					else
 						echo "<script type=\"text/javascript\">alert(\"Medical Test Deleted.\")</script>";
 				}					
-				else if(mysql_num_rows($result)>1)
+				else if(mysqli_num_rows($result)>1)
 				{
 					echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
 					echo "<div style=\"width:900px; float:left;\">";
 					echo "<h2 align=\"left\">Click the test to delete !!!</h2>";
-					for($i=0;$i<mysql_num_rows($result);$i=$i+1)
+					for($i=0;$i<mysqli_num_rows($result);$i=$i+1)
 					{
-						$val=mysql_fetch_array($result);
+						$val=mysqli_fetch_array($result);
 						$id=$val['Report_No'];
 						$name=$val['Tests'];
 						$date=$val['Test_date'];
@@ -2031,8 +2031,8 @@ else if(isset($_GET['pid']) && strcmp($_GET['pid'],"del_test") == 0)
 			$search=$_GET['id'];
 			$search1=$_GET['date'];
 			$search2=$_GET['rnum'];
-			$query=mysql_query("delete from diagnosis where Tests='$search' and Test_date='$search1' and Report_No='$search2'");
-			if(mysql_affected_rows()==0)
+			$query=mysqli_query($link,"delete from diagnosis where Tests='$search' and Test_date='$search1' and Report_No='$search2'");
+			if(mysqli_affected_rows()==0)
 				echo "<script type=\"text/javascript\">alert(\"Data Not Found.\")</script>";
 			else
 				echo "<script type=\"text/javascript\">alert(\"Medical Test Deleted.\")</script>";
@@ -2051,7 +2051,7 @@ else if(isset($_GET['pid'])&&((strcmp($_GET['pid'],"add_accompanies")==0)))
 		$gender=$_POST['gender'];
 		$rel=$_POST['rel'];
 		$id=$_POST['id'];
-		mysql_query("insert into accompanies values (\"$id\", \"$name\", \"$address\", \"$dob\", \"$contact\", \"$gender\", \"$rel\")");
+		mysqli_query($link,"insert into accompanies values (\"$id\", \"$name\", \"$address\", \"$dob\", \"$contact\", \"$gender\", \"$rel\")");
 		header('Location: ?pid=view_accompanies');
 	}
 	else
@@ -2087,12 +2087,12 @@ if(isset($_GET['pid']))
 					if(!empty($search) && ($search[0]=='V' || $search[0]=='v'))
 					{
 						
-						$result=mysql_query("select * from vehicles where Reg_No='$search'");
+						$result=mysqli_query($link,"select * from vehicles where Reg_No='$search'");
 						
-						if(mysql_num_rows($result)==1)
+						if(mysqli_num_rows($result)==1)
 						{
 							echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
-							$val=mysql_fetch_array($result);
+							$val=mysqli_fetch_array($result);
 							$reg=$val['Reg_No'];
 							$type=$val['Type'];
 							$dop=$val['DOP'];
@@ -2119,12 +2119,12 @@ if(isset($_GET['pid']))
 					
 					else if(!empty($search) && ($search[0]!='V' || $search[0]!='v'))
 					{
-						$result=mysql_query("select * from vehicles where Type='$search'");
+						$result=mysqli_query($link,"select * from vehicles where Type='$search'");
 						
-						if(mysql_num_rows($result)==1)
+						if(mysqli_num_rows($result)==1)
 						{
 							echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
-							$val=mysql_fetch_array($result);
+							$val=mysqli_fetch_array($result);
 							$reg=$val['Reg_No'];
 							$type=$val['Type'];
 							$dop=$val['DOP'];
@@ -2142,14 +2142,14 @@ if(isset($_GET['pid']))
 							echo "</table>";
 						}
 						
-						else if(mysql_num_rows($result)>1)
+						else if(mysqli_num_rows($result)>1)
 						{
 							echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
 							echo "<div style=\"width:900px; float:left;\">";
 							
-							for($i=0;$i<mysql_num_rows($result);$i=$i+1)
+							for($i=0;$i<mysqli_num_rows($result);$i=$i+1)
 							{
-								$val=mysql_fetch_array($result);
+								$val=mysqli_fetch_array($result);
 								$reg=$val['Reg_No'];
 								$type=$val['Type'];
 								echo "<div style=\"width:900px; float:left;\">";
@@ -2176,10 +2176,10 @@ if(isset($_GET['pid']))
 				echo "</form></table>";
 				
 				$search=$_GET['id'];
-				$result=mysql_query("select * from vehicles where Reg_No='$search'");
+				$result=mysqli_query($link,"select * from vehicles where Reg_No='$search'");
 				
 				echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
-				$val=mysql_fetch_array($result);
+				$val=mysqli_fetch_array($result);
 				$reg=$val['Reg_No'];
 				$type=$val['Type'];
 				$dop=$val['DOP'];
@@ -2210,12 +2210,12 @@ if(isset($_GET['pid']))
 				echo " <tr><td><input type=\"submit\" name=\"submit\"></submit></td></tr>";
 				echo " </table></form> ";
 				
-				/*$con = mysql_connect("localhost","root","","HMS");
+				/*$con = mysqli_connect("localhost","root","","HMS");
 				if(!$con)
 				{
 					echo " Connection Failed"; 
 				}
-			//	mysql_select_db("HMS", $con);
+			//	mysqli_select_db("HMS", $con);
 				
 				/*if(isset($_POST['reg']))
 				{
@@ -2234,14 +2234,14 @@ if(isset($_GET['pid']))
 						if(isset($_POST['Model']) )
 						{	
 					
-							$sel=mysql_query("select curdate() date");
-							$DOP=mysql_fetch_array($sel);
+							$sel=mysqli_query($link,"select curdate() date");
+							$DOP=mysqli_fetch_array($sel);
 							$DOP=$DOP['date'];
 							
 							$model=$_POST['Model'];
 							
-							$result=mysql_query("select max(Reg_No) R from vehicles");
-							$val=mysql_fetch_array($result);
+							$result=mysqli_query($link,"select max(Reg_No) R from vehicles");
+							$val=mysqli_fetch_array($result);
 							//echo $val;
 							$test=$val['R'];
 							$reg="V".(substr($test,1)+1);
@@ -2255,13 +2255,13 @@ if(isset($_GET['pid']))
 							echo $model;*/
 							
 							$query="INSERT INTO vehicles SET Type=\"Ambulance\",Reg_No='$reg',DOP='$DOP',Model='$model',ID=NULL,Rent=200";
-							$result=mysql_query($query);
+							$result=mysqli_query($link, $query);
 							
 							echo "<script type=\"text/javascript\">alert(\"Vehicle No. $reg has been added.\")</script>";
 							
 							//$query = "INSERT INTO Medicinecategory(BatchNo,Name,Category) VALUES ('$_POST[Batchno]','$_POST[Name]','$_POST[Category]')";
 							/*if(isset ($query))
-								$sql=mysql_query($query,$con);*/
+								$sql=mysqli_query($link, $query,$con);*/
 						}
 					}
 					
@@ -2273,15 +2273,15 @@ if(isset($_GET['pid']))
 							//$DOP=$_POST['DOP'];
 							$model=$_POST['Model'];
 							
-							$sel=mysql_query("select curdate() date");
-							$DOP=mysql_fetch_array($sel);
+							$sel=mysqli_query($link,"select curdate() date");
+							$DOP=mysqli_fetch_array($sel);
 							$DOP=$DOP['date'];
-							/*$result=mysql_query("select * from vehicles");
-							$val=mysql_num_rows($result);*/
+							/*$result=mysqli_query($link,"select * from vehicles");
+							$val=mysqli_num_rows($result);*/
 							//echo $val;
 							
-							$result=mysql_query("select max(Reg_No) R from vehicles");
-							$val=mysql_fetch_array($result);
+							$result=mysqli_query($link,"select max(Reg_No) R from vehicles");
+							$val=mysqli_fetch_array($result);
 							//echo $val;
 							$test=$val['R'];
 							$reg="V".(substr($test,1)+1);
@@ -2296,13 +2296,13 @@ if(isset($_GET['pid']))
 							echo $model;*/
 							
 							$query="INSERT INTO vehicles SET Type=\"Taxi\",Reg_No='$reg',DOP='$DOP',Model='$model',ID=NULL,Rent=500";
-							$result=mysql_query($query);
+							$result=mysqli_query($link, $query);
 								
 							echo "<script type=\"text/javascript\">alert(\"Vehicle Added\") </script>";
 						
 							//$query = "INSERT INTO Medicinecategory(BatchNo,Name,Category) VALUES ('$_POST[Batchno]','$_POST[Name]','$_POST[Category]')";
 							/*if(isset ($query))
-								$sql=mysql_query($query,$con);*/
+								$sql=mysqli_query($link, $query,$con);*/
 						}	
 					}
 				}
@@ -2322,11 +2322,11 @@ if(isset($_GET['pid']))
 					if(!empty($search) &&($search[0]=='V' || $search[0]=='v'))
 					{
 						
-						$result=mysql_query("select * from vehicles where Reg_No='$search'");
+						$result=mysqli_query($link,"select * from vehicles where Reg_No='$search'");
 						
-						if(mysql_num_rows($result)==1)
+						if(mysqli_num_rows($result)==1)
 						{
-							$query=mysql_query("delete from vehicles where Reg_No='$search'");
+							$query=mysqli_query($link,"delete from vehicles where Reg_No='$search'");
 							echo "<br/><br/><br/>";
 							echo "<script type=\"text/javascript\">alert(\"Vehicle discarded\") </script>";
  
@@ -2341,23 +2341,23 @@ if(isset($_GET['pid']))
 					
 					else if(!empty($search) &&($search[0]!='V' || $search[0]!='v'))
 					{
-						$result=mysql_query("select * from vehicles where Type='$search'");
+						$result=mysqli_query($link,"select * from vehicles where Type='$search'");
 						
-						if(mysql_num_rows($result)==1)
+						if(mysqli_num_rows($result)==1)
 						{
-							$query=mysql_query("delete from vehicles where Type='$search'");
+							$query=mysqli_query($link,"delete from vehicles where Type='$search'");
 							echo "<br/><br/><br/>";
 							echo "<script type=\"text/javascript\">alert(\"Vehicle discarded\") </script>";
 						}
 						
-						else if(mysql_num_rows($result)>=1)
+						else if(mysqli_num_rows($result)>=1)
 						{
 							echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
 							echo "<div style=\"width:900px; float:left;\">";
 							
-							for($i=0;$i<mysql_num_rows($result);$i=$i+1)
+							for($i=0;$i<mysqli_num_rows($result);$i=$i+1)
 							{
-								$val=mysql_fetch_array($result);
+								$val=mysqli_fetch_array($result);
 								$reg=$val['Reg_No'];
 								$type=$val['Type'];
 								echo "<div style=\"width:900px; float:left;\">";
@@ -2385,9 +2385,9 @@ if(isset($_GET['pid']))
 				if(isset($_GET['id']))
 				{
 					$search=$_GET['id'];
-					$result=mysql_query("select * from vehicles where Reg_No='$search'");
+					$result=mysqli_query($link,"select * from vehicles where Reg_No='$search'");
 					//echo $search;
-					$query=mysql_query("delete from vehicles where Reg_No='$search'");
+					$query=mysqli_query($link,"delete from vehicles where Reg_No='$search'");
 					echo "<br/><br/><br/>";
 					echo "<script type=\"text/javascript\">alert(\"Vehicle discarded\") </script>";
 				}	
@@ -2407,12 +2407,12 @@ if(isset($_GET['pid']))
 					if(!empty($search) && ($search[0]=='Z' || $search[0]=='z'))
 					{
 						
-						$result=mysql_query("select * from room where Room_No='$search'");
+						$result=mysqli_query($link,"select * from room where Room_No='$search'");
 						
-						if(mysql_num_rows($result)==1)
+						if(mysqli_num_rows($result)==1)
 						{
 							echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
-							$val=mysql_fetch_array($result);
+							$val=mysqli_fetch_array($result);
 							$reg=$val['Room_No'];
 							$type=$val['Type'];
 							$ext=$val['Extension'];
@@ -2436,12 +2436,12 @@ if(isset($_GET['pid']))
 					
 					else if(!empty($search) && ($search[0]!='Z' || $search[0]!='z'))
 					{
-						$result=mysql_query("select * from Room where Type='$search'");
+						$result=mysqli_query($link,"select * from Room where Type='$search'");
 						
-						if(mysql_num_rows($result)==1)
+						if(mysqli_num_rows($result)==1)
 						{
 							echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
-							$val=mysql_fetch_array($result);
+							$val=mysqli_fetch_array($result);
 							$reg=$val['Room_No'];
 							$type=$val['Type'];
 							$ext=$val['Extension'];
@@ -2457,14 +2457,14 @@ if(isset($_GET['pid']))
 
 						}
 						
-						else if(mysql_num_rows($result)>=1)
+						else if(mysqli_num_rows($result)>=1)
 						{
 							echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
 							echo "<div style=\"width:900px; float:left;\">";
 							
-							for($i=0;$i<mysql_num_rows($result);$i=$i+1)
+							for($i=0;$i<mysqli_num_rows($result);$i=$i+1)
 							{
-								$val=mysql_fetch_array($result);
+								$val=mysqli_fetch_array($result);
 								$reg=$val['Room_No'];
 								$type=$val['Type'];
 								echo "<div style=\"width:900px; float:left;\">";
@@ -2499,12 +2499,12 @@ if(isset($_GET['pid']))
 				echo "<tr><td> <input type=\"submit\" name=\"submit\"></submit> </td></tr>";
 				echo "</table> </form> ";
 				
-				/*$con = mysql_connect("localhost","root","","HMS");
+				/*$con = mysqli_connect("localhost","root","","HMS");
 				if(!$con)
 				{
 					echo " Connection Failed"; 
 				}
-			//	mysql_select_db("HMS", $con);
+			//	mysqli_select_db("HMS", $con);
 				
 				/*if(isset($_POST['reg']))
 				{
@@ -2517,8 +2517,8 @@ if(isset($_GET['pid']))
 				if(isset($_POST['drop']) && isset($_POST['ext']) ) //
 				{
 					$ext=$_POST['ext'];
-					$check=mysql_query("select * from room where Extension='$ext'");
-					if(mysql_num_rows($check)>=1)
+					$check=mysqli_query($link,"select * from room where Extension='$ext'");
+					if(mysqli_num_rows($check)>=1)
 					{
 						//echo "check";
 						$flag=0;
@@ -2539,23 +2539,23 @@ if(isset($_GET['pid']))
 							echo $DOP;
 							echo $model;*/
 
-							$result=mysql_query("select * from room");
-							$val=mysql_num_rows($result);
+							$result=mysqli_query($link,"select * from room");
+							$val=mysqli_num_rows($result);
 
-							$result=mysql_query("select max(Room_No) R from room");
-							$val=mysql_fetch_array($result);
+							$result=mysqli_query($link,"select max(Room_No) R from room");
+							$val=mysqli_fetch_array($result);
 							//echo $val;
 							$test=$val['R'];
 							$room="Z".(substr($test,1)+1);
 							
 							$query="INSERT INTO room SET Room_No='$room',Type=\"Gen\",Extension='$ext',Rent=2500,Patient_ID=null";
-							$result=mysql_query($query);
+							$result=mysqli_query($link, $query);
 							
 							echo "<script type=\"text/javascript\">alert(\"Room No. $room has been added.\")</script>";
 							
 							//$query = "INSERT INTO Medicinecategory(BatchNo,Name,Category) VALUES ('$_POST[Batchno]','$_POST[Name]','$_POST[Category]')";
 							/*if(isset ($query))
-								$sql=mysql_query($query,$con);*/
+								$sql=mysqli_query($link, $query,$con);*/
 							
 							//echo $val;
 							
@@ -2567,7 +2567,7 @@ if(isset($_GET['pid']))
 							
 							//$query = "INSERT INTO Medicinecategory(BatchNo,Name,Category) VALUES ('$_POST[Batchno]','$_POST[Name]','$_POST[Category]')";
 							/*if(isset ($query))
-								$sql=mysql_query($query,$con);*/
+								$sql=mysqli_query($link, $query,$con);*/
 								
 						}
 					}
@@ -2586,23 +2586,23 @@ if(isset($_GET['pid']))
 							echo $DOP;
 							echo $model;*/
 
-							$result=mysql_query("select * from room");
-							$val=mysql_num_rows($result);
+							$result=mysqli_query($link,"select * from room");
+							$val=mysqli_num_rows($result);
 
-							$result=mysql_query("select max(Room_No) R from room");
-							$val=mysql_fetch_array($result);
+							$result=mysqli_query($link,"select max(Room_No) R from room");
+							$val=mysqli_fetch_array($result);
 							//echo $val;
 							$test=$val['R'];
 							$room="Z".(substr($test,1)+1);
 							
 							$query="INSERT INTO room SET Room_No='$room',Type=\"PRI\",Extension='$ext',Rent=2500,Patient_ID=null";
-							$result=mysql_query($query);
+							$result=mysqli_query($link, $query);
 							
 							echo "<script type=\"text/javascript\">alert(\"Room Added\") </script>";
 							
 							//$query = "INSERT INTO Medicinecategory(BatchNo,Name,Category) VALUES ('$_POST[Batchno]','$_POST[Name]','$_POST[Category]')";
 							/*if(isset ($query))
-								$sql=mysql_query($query,$con);*/
+								$sql=mysqli_query($link, $query,$con);*/
 							
 							//echo $val;
 							
@@ -2614,7 +2614,7 @@ if(isset($_GET['pid']))
 							
 							//$query = "INSERT INTO Medicinecategory(BatchNo,Name,Category) VALUES ('$_POST[Batchno]','$_POST[Name]','$_POST[Category]')";
 							/*if(isset ($query))
-								$sql=mysql_query($query,$con);*/
+								$sql=mysqli_query($link, $query,$con);*/
 						}
 					}
 					
@@ -2632,23 +2632,23 @@ if(isset($_GET['pid']))
 							echo $DOP;
 							echo $model;*/
 
-							$result=mysql_query("select * from room");
-							$val=mysql_num_rows($result);
+							$result=mysqli_query($link,"select * from room");
+							$val=mysqli_num_rows($result);
 
-							$result=mysql_query("select max(Room_No) R from room");
-							$val=mysql_fetch_array($result);
+							$result=mysqli_query($link,"select max(Room_No) R from room");
+							$val=mysqli_fetch_array($result);
 							//echo $val;
 							$test=$val['R'];
 							$room="Z".(substr($test,1)+1);
 							
 							$query="INSERT INTO room SET Room_No='$room',Type=\"ICU\",Extension='$ext',Rent=2500,Patient_ID=null";
-							$result=mysql_query($query);
+							$result=mysqli_query($link, $query);
 							
 							echo "<script type=\"text/javascript\">alert(\"Room Added\") </script>";
 							
 							//$query = "INSERT INTO Medicinecategory(BatchNo,Name,Category) VALUES ('$_POST[Batchno]','$_POST[Name]','$_POST[Category]')";
 							/*if(isset ($query))
-								$sql=mysql_query($query,$con);*/
+								$sql=mysqli_query($link, $query,$con);*/
 							
 							//echo $val;
 							
@@ -2660,7 +2660,7 @@ if(isset($_GET['pid']))
 							
 							//$query = "INSERT INTO Medicinecategory(BatchNo,Name,Category) VALUES ('$_POST[Batchno]','$_POST[Name]','$_POST[Category]')";
 							/*if(isset ($query))
-								$sql=mysql_query($query,$con);*/
+								$sql=mysqli_query($link, $query,$con);*/
 						}
 					}
 					
@@ -2681,10 +2681,10 @@ if(isset($_GET['pid']))
 				echo "</form></table>";
 				
 				$search=$_GET['id'];
-				$result=mysql_query("select * from room where Room_No='$search'");
+				$result=mysqli_query($link,"select * from room where Room_No='$search'");
 				
 				echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
-				$val=mysql_fetch_array($result);
+				$val=mysqli_fetch_array($result);
 				$reg=$val['Room_No'];
 				$type=$val['Type'];
 				$ext=$val['Extension'];
@@ -2710,11 +2710,11 @@ if(isset($_GET['pid']))
 					if(!empty($search) && ($search[0]=='Z' || $search[0]=='z'))
 					{
 						
-						$result=mysql_query("select * from room where Room_No='$search'");
+						$result=mysqli_query($link,"select * from room where Room_No='$search'");
 						
-						if(mysql_num_rows($result)==1)
+						if(mysqli_num_rows($result)==1)
 						{
-							$query=mysql_query("delete from room where Room_No='$search'");
+							$query=mysqli_query($link,"delete from room where Room_No='$search'");
 							echo "hello";
 							echo "<br/><br/><br/>";
 							echo "<script type=\"text/javascript\">alert(\"Room Discarded\") </script>";
@@ -2729,23 +2729,23 @@ if(isset($_GET['pid']))
 					
 					else if(!empty($search) && ($search[0]!='Z' || $search[0]!='z'))
 					{
-						$result=mysql_query("select * from room where Type='$search'");
+						$result=mysqli_query($link,"select * from room where Type='$search'");
 						
-						if(mysql_num_rows($result)==1)
+						if(mysqli_num_rows($result)==1)
 						{
-							$query=mysql_query("delete from room where Type='$search'");
+							$query=mysqli_query($link,"delete from room where Type='$search'");
 							echo "<br/><br/><br/>";
 							echo "<script type=\"text/javascript\">alert(\"Room discarded\") </script>";
 						}
 						
-						else if(mysql_num_rows($result)>=1)
+						else if(mysqli_num_rows($result)>=1)
 						{
 							echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
 							echo "<div style=\"width:900px; float:left;\">";
 							
-							for($i=0;$i<mysql_num_rows($result);$i=$i+1)
+							for($i=0;$i<mysqli_num_rows($result);$i=$i+1)
 							{
-								$val=mysql_fetch_array($result);
+								$val=mysqli_fetch_array($result);
 								$reg=$val['Room_No'];
 								$type=$val['Type'];
 								echo "<div style=\"width:900px; float:left;\">";
@@ -2771,9 +2771,9 @@ if(isset($_GET['pid']))
 				if(isset($_GET['id']))
 				{
 					$search=$_GET['id'];
-					$result=mysql_query("select * from room where Room_No='$search'");
+					$result=mysqli_query($link,"select * from room where Room_No='$search'");
 					//echo $search;
-					$query=mysql_query("delete from room where Room_No='$search'");
+					$query=mysqli_query($link,"delete from room where Room_No='$search'");
 					echo "<br/><br/><br/>";
 					echo "<script type=\"text/javascript\">alert(\"Room Discarded\") </script>";
 				}	
@@ -2792,32 +2792,32 @@ if(isset($_GET['pid']))
 					
 					if((!empty($search)) && ($search[0]=='V' || $search[0]=='v'))
 					{
-						$find=mysql_query("select * from vehicles where Reg_No='$search'");
+						$find=mysqli_query($link,"select * from vehicles where Reg_No='$search'");
 						
-						if(mysql_num_rows($find)==0)
+						if(mysqli_num_rows($find)==0)
 							echo "<script type=\"text/javascript\">alert(\"Vehicle not found!\") </script>";
 							
 						else
 						{
-							$result=mysql_query("select * from vehicle_given where Reg_No='$search'");
+							$result=mysqli_query($link,"select * from vehicle_given where Reg_No='$search'");
 							
-							if(mysql_num_rows($result)==0)
+							if(mysqli_num_rows($result)==0)
 							{
 								echo "<script type=\"text/javascript\">alert(\"Vehicle not alloted!\") </script>";
 							}
 							
 							else
 							{
-								if((!empty($result) && mysql_num_rows($result)==1))
+								if((!empty($result) && mysqli_num_rows($result)==1))
 								{
 									echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
-									$val=mysql_fetch_array($result);
+									$val=mysqli_fetch_array($result);
 									$reg=$val['Reg_No'];
 									$id=$val['ID'];
 									$ad=$val['Allot_date'];
 									$rd=$val['Return_date'];
-									$rent=mysql_query("select Rent from vehicles where Reg_No='$search'");	
-									$cost=mysql_fetch_array($rent);
+									$rent=mysqli_query($link,"select Rent from vehicles where Reg_No='$search'");	
+									$cost=mysqli_fetch_array($rent);
 									$price=$cost['Rent'];
 									
 									echo " <h3> Vehicle Allotment History</h3> ";
@@ -2830,16 +2830,16 @@ if(isset($_GET['pid']))
 									echo "</table>";
 								}
 								
-								else if(!empty($result) && (mysql_num_rows($result)>1))
+								else if(!empty($result) && (mysqli_num_rows($result)>1))
 								{
 									echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
 									echo "<div style=\"width:900px; float:left;\">";
 									
 									echo " <h3> Select any vehicle</h3> ";
 									
-									for($i=0;$i<mysql_num_rows($result);$i=$i+1)
+									for($i=0;$i<mysqli_num_rows($result);$i=$i+1)
 									{
-										$val=mysql_fetch_array($result);
+										$val=mysqli_fetch_array($result);
 										$reg=$val['Reg_No'];
 										$id=$val['ID'];
 										$ad=$val['Allot_date'];
@@ -2858,32 +2858,32 @@ if(isset($_GET['pid']))
 					
 					else if((!empty($search)) && ($search[0]!='V' || $search[0]!='v'))
 					{
-						$find=mysql_query("select * from vehicles where Type='$search'");
+						$find=mysqli_query($link,"select * from vehicles where Type='$search'");
 						
-						if(mysql_num_rows($find)==0)
+						if(mysqli_num_rows($find)==0)
 							echo "<script type=\"text/javascript\">alert(\"Vehicle not found!\") </script>";
 							
 						else
 						{
-							$result=mysql_query("select b.Reg_No,b.ID,b.Allot_date,b.Return_date from vehicles a,vehicle_given b where a.Type='$search' and a.Reg_No=b.Reg_No");
+							$result=mysqli_query($link,"select b.Reg_No,b.ID,b.Allot_date,b.Return_date from vehicles a,vehicle_given b where a.Type='$search' and a.Reg_No=b.Reg_No");
 							
-							if(mysql_num_rows($result)==0)
+							if(mysqli_num_rows($result)==0)
 							{
 								echo "<script type=\"text/javascript\">alert(\"Vehicle not alloted!\") </script>";
 							}
 							
 							else
 							{
-								if((!empty($result) && mysql_num_rows($result)==1))
+								if((!empty($result) && mysqli_num_rows($result)==1))
 								{
 									echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
-									$val=mysql_fetch_array($result);
+									$val=mysqli_fetch_array($result);
 									$reg=$val['Reg_No'];
 									$id=$val['ID'];
 									$ad=$val['Allot_date'];
 									$rd=$val['Return_date'];
-									$rent=mysql_query("select Rent from vehicles where Type='$search'");		
-									$cost=mysql_fetch_array($rent);
+									$rent=mysqli_query($link,"select Rent from vehicles where Type='$search'");		
+									$cost=mysqli_fetch_array($rent);
 									$price=$cost['Rent'];
 									
 									echo " <h3> Vehicle Allotment History</h3> ";
@@ -2897,16 +2897,16 @@ if(isset($_GET['pid']))
 								}
 								
 								
-								else if(!empty($result) && (mysql_num_rows($result)>1))
+								else if(!empty($result) && (mysqli_num_rows($result)>1))
 								{
 									echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
 									echo "<div style=\"width:900px; float:left;\">";
 									
 									echo " <h3> Select any vehicle</h3> ";
 									
-									for($i=0;$i<mysql_num_rows($result);$i=$i+1)
+									for($i=0;$i<mysqli_num_rows($result);$i=$i+1)
 									{
-										$val=mysql_fetch_array($result);
+										$val=mysqli_fetch_array($result);
 										$reg=$val['Reg_No'];
 										$id=$val['ID'];
 										$ad=$val['Allot_date'];								
@@ -2937,9 +2937,9 @@ if(isset($_GET['pid']))
 				if(isset($_GET['id']) && isset($_GET['reg']) && isset($_GET['ad']) || isset($_GET['rd']) )
 				{
 					$search=$_GET['reg'];
-					//$result=mysql_query("select * from vehicle_given where Reg_No='$search'");
+					//$result=mysqli_query($link,"select * from vehicle_given where Reg_No='$search'");
 					echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
-					//$val=mysql_fetch_array($result);
+					//$val=mysqli_fetch_array($result);
 					
 				//	$reg=$val['Reg_No'];
 					$id=$_GET['id'];
@@ -2947,8 +2947,8 @@ if(isset($_GET['pid']))
 					$ad=$_GET['ad']; 
 					$rd=$_GET['rd'];
 					
-					$rent=mysql_query("select Rent from vehicles where Reg_No='$search'");	
-					$cost=mysql_fetch_array($rent);
+					$rent=mysqli_query($link,"select Rent from vehicles where Reg_No='$search'");	
+					$cost=mysqli_fetch_array($rent);
 					$price=$cost['Rent'];
 					
 					echo " <h3> Vehicle Allotment History</h3> ";
@@ -2977,32 +2977,32 @@ if(isset($_GET['pid']))
 					
 					if((!empty($search)) && ($search[0]=='Z' || $search[0]=='z'))
 					{
-						$find=mysql_query("select * from room where Room_No='$search'");
+						$find=mysqli_query($link,"select * from room where Room_No='$search'");
 						
-						if(mysql_num_rows($find)==0)
+						if(mysqli_num_rows($find)==0)
 							echo "<script type=\"text/javascript\">alert(\"Room not found!\") </script>";
 							
 						else
 						{
-							$result=mysql_query("select * from room_given where Room_No='$search'");
+							$result=mysqli_query($link,"select * from room_given where Room_No='$search'");
 							
-							if(mysql_num_rows($result)==0)
+							if(mysqli_num_rows($result)==0)
 							{
 								echo "<script type=\"text/javascript\">alert(\"Room not alloted!\") </script>";
 							}
 							
 							else
 							{
-								if((!empty($result) && mysql_num_rows($result)==1))
+								if((!empty($result) && mysqli_num_rows($result)==1))
 								{
 									echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
-									$val=mysql_fetch_array($result);
+									$val=mysqli_fetch_array($result);
 									$room=$val['Room_No'];
 									$id=$val['Patient_ID'];
 									$ad=$val['Allot_date'];
 									$rd=$val['Discharge_date'];
-									$rent=mysql_query("select Rent from room where Room_No='$search'");
-									$price=mysql_fetch_array($rent);
+									$rent=mysqli_query($link,"select Rent from room where Room_No='$search'");
+									$price=mysqli_fetch_array($rent);
 									$cost=$price['Rent'];
 									
 									echo " <h3> Room Allotment History</h3> ";
@@ -3015,14 +3015,14 @@ if(isset($_GET['pid']))
 									echo "</table>";
 								}
 								
-								else if(!empty($result) && (mysql_num_rows($result)>1))
+								else if(!empty($result) && (mysqli_num_rows($result)>1))
 								{
 									echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
 									echo "<div style=\"width:900px; float:left;\">";
 									
-									for($i=0;$i<mysql_num_rows($result);$i=$i+1)
+									for($i=0;$i<mysqli_num_rows($result);$i=$i+1)
 									{
-										$val=mysql_fetch_array($result);
+										$val=mysqli_fetch_array($result);
 										$room=$val['Room_No'];
 										$id=$val['Patient_ID'];
 										$ad=$val['Allot_date'];
@@ -3041,33 +3041,33 @@ if(isset($_GET['pid']))
 					
 					else if((!empty($search)) && ($search[0]!='Z' || $search[0]!='z'))
 					{
-						$find=mysql_query("select * from room where Type='$search'");
+						$find=mysqli_query($link,"select * from room where Type='$search'");
 						
-						if(mysql_num_rows($find)==0)
+						if(mysqli_num_rows($find)==0)
 							echo "<script type=\"text/javascript\">alert(\"Room not found!\") </script>";
 							
 						else
 						{
-							$result=mysql_query("select * from room a,room_given b where a.Type='$search' and a.Room_No=b.Room_No");
-							//echo mysql_num_rows($result);
+							$result=mysqli_query($link,"select * from room a,room_given b where a.Type='$search' and a.Room_No=b.Room_No");
+							//echo mysqli_num_rows($result);
 						
-							if(mysql_num_rows($result)==0)
+							if(mysqli_num_rows($result)==0)
 							{
 								echo "<script type=\"text/javascript\">alert(\"Room not alloted!\") </script>";
 							}
 		
 							else
 							{
-								if((!empty($result) && mysql_num_rows($result)==1))
+								if((!empty($result) && mysqli_num_rows($result)==1))
 								{
 									echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
-									$val=mysql_fetch_array($result);
+									$val=mysqli_fetch_array($result);
 									$room=$val['Room_No'];
 									$id=$val['Patient_ID'];
 									$ad=$val['Allot_date'];
 									$rd=$val['Discharge_date'];
-									$rent=mysql_query("select Rent from room where Room_No='$search'");
-									$price=mysql_fetch_array($rent);
+									$rent=mysqli_query($link,"select Rent from room where Room_No='$search'");
+									$price=mysqli_fetch_array($rent);
 									$cost=$price['Rent'];
 									
 									
@@ -3081,16 +3081,16 @@ if(isset($_GET['pid']))
 									echo "</table>";
 								}
 								
-								else if(!empty($result) && (mysql_num_rows($result)>1))
+								else if(!empty($result) && (mysqli_num_rows($result)>1))
 								{
 									echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
 									echo "<div style=\"width:900px; float:left;\">";
 									
 									echo " <h3> Select any room</h3> ";
 									
-									for($i=0;$i<mysql_num_rows($result);$i=$i+1)
+									for($i=0;$i<mysqli_num_rows($result);$i=$i+1)
 									{
-										$val=mysql_fetch_array($result);
+										$val=mysqli_fetch_array($result);
 										$room=$val['Room_No'];
 										$id=$val['Patient_ID'];
 										$ad=$val['Allot_date'];
@@ -3123,9 +3123,9 @@ if(isset($_GET['pid']))
 					if(isset($_GET['id']) && isset($_GET['room']) && isset($_GET['ad']) || isset($_GET['rd']) )
 					{
 						$search=$_GET['room'];
-						//$result=mysql_query("select * from vehicle_given where Reg_No='$search'");
+						//$result=mysqli_query($link,"select * from vehicle_given where Reg_No='$search'");
 						echo "<div><link rel=\"stylesheet\" href=\"css/style01.css\">";
-						//$val=mysql_fetch_array($result);
+						//$val=mysqli_fetch_array($result);
 						
 					//	$reg=$val['Reg_No'];
 						$id=$_GET['id'];
@@ -3133,8 +3133,8 @@ if(isset($_GET['pid']))
 						$ad=$_GET['ad']; 
 						$rd=$_GET['rd'];
 						
-						$rent=mysql_query("select Rent from room where Room_No='$search'");	
-						$cost=mysql_fetch_array($rent);
+						$rent=mysqli_query($link,"select Rent from room where Room_No='$search'");	
+						$cost=mysqli_fetch_array($rent);
 						$price=$cost['Rent'];
 						
 						echo " <h3> Room Allotment History</h3> ";
